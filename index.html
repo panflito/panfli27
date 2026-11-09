@@ -49,7 +49,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--tinta);outline-offs
 .chapa.osc{color:#1d1606}
 .toque{position:absolute;left:0;top:0;width:40px;height:48px;pointer-events:auto;z-index:4;display:block}
 .paradas{position:absolute;inset:0}
-.toque .chapa{position:absolute;left:50%;bottom:0;transform:translate(-50%,0)}
+.toque .chapa{position:absolute;left:50%;top:4px;transform:translate(-50%,0)}
 
 /* carteles y paradas, al costado de la vía ya derecha */
 .rotulos{position:absolute;inset:0;z-index:3;pointer-events:none}
@@ -271,8 +271,9 @@ function cuadro(){
     const op=1-suave((b-0.25)/0.55);
     o.g.style.opacity=op;o.g.style.visibility=op<0.02?'hidden':'visible';
     // chapa al pie de la parte que se ve en la portada
-    const k=Math.min(3,o.ch.length-1),q=pos[k],pk=o.ch[k];
-    o.toque.style.transform=`translate(${q.x-20-Math.sin(q.ang)*pk.h}px,${q.y+Math.cos(q.ang)*pk.h-24}px)`;
+    // chapa en el comienzo de la rama, arriba, donde cuelga
+    const q=pos[0];
+    o.toque.style.transform=`translate(${q.x-20}px,${q.y-34}px)`;
     o.toque.style.opacity=1-suave(t/0.5);o.toque.style.visibility=t>0.6?'hidden':'visible';
   });
   // textos de la línea elegida: aparecen cuando ya está derecha
