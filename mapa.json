@@ -65,7 +65,8 @@
    "linea": 3,
    "tipo": "principal",
    "nombre": "Theo y Simón",
-   "url": "https://open.spotify.com/intl-es/artist/2Ab0XAShZJTAEQoJFq0nRM"
+   "url": "https://open.spotify.com/intl-es/artist/2Ab0XAShZJTAEQoJFq0nRM",
+   "destino": "Spotify"
   },
   {
    "x": 0.1999,
@@ -73,7 +74,8 @@
    "linea": 1,
    "tipo": "principal",
    "nombre": "YouTube",
-   "url": "https://www.youtube.com/@ElAhijado4"
+   "url": "https://www.youtube.com/@ElAhijado4",
+   "destino": "mi canal"
   },
   {
    "x": 0.2965,
@@ -95,7 +97,8 @@
    "linea": 3,
    "tipo": "chica",
    "nombre": "Ultimo Piso (video)",
-   "url": "https://www.youtube.com/watch?v=lta22JNHBfY"
+   "url": "https://www.youtube.com/watch?v=lta22JNHBfY",
+   "destino": "YouTube"
   },
   {
    "x": 0.8267,
@@ -116,7 +119,15 @@
    "y": 0.1479,
    "linea": 5,
    "tipo": "chica",
-   "nombre": "Columnitas"
+   "nombre": "Columnitas",
+   "contenido": "columnitas"
   }
+ ],
+ "orden": [
+  3,
+  1,
+  2,
+  4,
+  5
  ]
 }

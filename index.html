@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con cuatro líneas: Theo y Simón, YouTube, escritos y arte visual.">
+<meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con sus líneas: Theo y Simón, YouTube, cuentos y columnitas, arte visual y más.">
 <title>PANFLITO</title>
 <link rel="preload" href="img/mapa.png" as="image" fetchpriority="high">
 <link rel="preload" href="mapa.json" as="fetch" crossorigin>
@@ -17,71 +17,278 @@
 <style>
 body{margin:0}
 
-/* layout: solo el dibujo. Su línea es el mapa: cada tramo de color es una línea, con sus paradas encima */
+/* layout: inicio = solo el dibujo (su línea es el mapa). Al tocar una línea, queda recta arriba y el contenido va abajo */
 :root{
   --papel:#fbfaf7; --tinta:#141312;
   --titulo:"Gill Sans","Gill Sans MT","Gill Sans Nova",Lato,"Trebuchet MS",sans-serif;
+  --celda:150px; --alto:124px; --via:96px; --g:15.5px;
   color-scheme:light;
 }
 *{box-sizing:border-box}
 html{overflow-x:clip}
 body{margin:0;background:var(--papel);color:var(--tinta);font-family:var(--titulo);overflow-x:clip}
+body.abierta{overflow:hidden}
 a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 /* el nombre queda para Google y lectores de pantalla; a la vista, solo el dibujo */
 h1{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0}
 .pagina{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:72px 64px}
+.pagina.fuera{visibility:hidden}
 /* la tinta del dibujo va del 4,36% al 94,07% del ancho de la imagen: se corre 0,79% a la derecha para que quede centrada */
-.mapa{position:relative;width:100%;max-width:520px;margin:0 auto;left:.79%}
-.mapa img{display:block;width:100%;height:auto;filter:drop-shadow(1px 2px 2px rgba(0,0,0,.18))}
-.paradas{list-style:none;margin:0;padding:0}
+.mapa{position:relative;width:100%;max-width:520px;margin:0 auto;left:.79%;transform-origin:0 0}
+.mapa.vuela{z-index:30}
+.mapa img{display:block;width:100%;height:auto;filter:drop-shadow(1px 2px 2px rgba(0,0,0,.18));cursor:pointer;-webkit-tap-highlight-color:transparent}
+.paradas{list-style:none;margin:0;padding:0;transition:opacity .15s}
+.mapa.vuela .paradas{opacity:0}
 /* parada: circulito de estación sobre la línea */
 .parada{position:absolute;width:0;height:0}
-.parada .punto{position:absolute;left:0;top:0;width:var(--d);height:var(--d);margin:calc(var(--d) / -2) 0 0 calc(var(--d) / -2);border-radius:50%;
+.punto{position:absolute;left:0;top:0;width:var(--d);height:var(--d);margin:calc(var(--d) / -2) 0 0 calc(var(--d) / -2);border-radius:50%;
   background:var(--papel);border:calc(var(--d) * .27) solid var(--c);box-shadow:0 1px 2px rgba(0,0,0,.25)}
 .parada.principal{--d:15px}
 .parada.chica{--d:9px}
 /* nombre en diagonal hacia arriba, como en el plano del subte */
-.parada .nombre{position:absolute;left:7px;bottom:5px;white-space:nowrap;font-weight:600;font-size:13.5px;line-height:1;color:var(--c);transform-origin:0 100%;transform:rotate(-45deg);padding:3px 2px;
+.nombre{position:absolute;left:7px;bottom:5px;white-space:nowrap;font-weight:600;font-size:13.5px;line-height:1;color:var(--c);transform-origin:0 100%;transform:rotate(-45deg);padding:3px 2px;
   text-shadow:0 0 2px var(--papel),0 0 2px var(--papel),0 0 4px var(--papel),0 0 4px var(--papel)}
 /* zona de toque cómoda para el dedo */
-.parada a{position:absolute;left:-18px;top:-18px;width:36px;height:36px;border-radius:50%}
-.parada.principal a{width:auto;height:auto;left:0;top:0}
-.parada.principal a::before{content:"";position:absolute;left:-20px;top:-20px;width:40px;height:40px;border-radius:50%}
-.parada a:hover .nombre,.parada a:active .nombre,.parada a:focus-visible .nombre{background:#fff23a;text-shadow:none}
-.parada a:focus-visible{outline:none}
-.parada a:focus-visible .punto,.parada.chica a:focus-visible{box-shadow:0 0 0 3px var(--tinta)}
+.parada button{position:absolute;left:0;top:0}
+.parada button::before{content:"";position:absolute;left:-20px;top:-20px;width:40px;height:40px;border-radius:50%}
+.parada button:hover .nombre,.parada button:active .nombre,.parada button:focus-visible .nombre{background:#fff23a;text-shadow:none}
+button:focus-visible{outline:none}
+.parada button:focus-visible .punto{box-shadow:0 0 0 3px var(--tinta)}
+
+/* ---------- vista de línea ---------- */
+.vista{position:fixed;inset:0;z-index:10;background:var(--papel);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.vista[hidden]{display:none}
+.barra{position:sticky;top:0;z-index:2;height:calc(var(--alto) + 10px);background:linear-gradient(var(--papel) calc(100% - 10px),transparent)}
+/* la casita: vuelve al dibujo */
+.casita{position:absolute;z-index:3;left:max(8px,env(safe-area-inset-left,0px));top:6px;width:46px;height:46px;border-radius:50%;background:var(--papel);box-shadow:0 0 8px 6px var(--papel)}
+.casita img{display:block;width:100%;height:100%}
+.casita.espera{visibility:hidden}
+.casita:focus-visible{box-shadow:0 0 0 3px var(--tinta)}
+/* el riel se desliza al costado; cada parada frena en el centro */
+.riel{height:var(--alto);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.riel::-webkit-scrollbar{display:none}
+.via{position:relative;display:flex;width:max-content;height:100%;list-style:none;margin:0;padding:0}
+.via::before{content:"";position:absolute;left:0;right:0;top:var(--via);height:var(--g);box-shadow:3px 6px 10px rgba(0,0,0,.2)}
+.celda{position:relative;flex:0 0 var(--celda);height:100%;scroll-snap-align:center}
+/* el tubo: cara clara arriba, base, cara oscura abajo; una línea de brillo y una de sombra */
+.celda::before{content:"";position:absolute;left:0;right:0;top:var(--via);height:var(--g);
+  background:
+    linear-gradient(to bottom,transparent 1.5px,var(--t3) 1.5px,var(--t3) 5.5px,transparent 5.5px),
+    linear-gradient(to top,color-mix(in srgb,var(--t0) 75%,#000) 1.5px,transparent 1.5px),
+    linear-gradient(to bottom,var(--t2) 0,var(--t2) 12%,var(--c) 32%,var(--c) 66%,var(--t0) 86%),
+    var(--papel);
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.72),#000 50%);mask-image:linear-gradient(to bottom,rgba(0,0,0,.72),#000 50%)}
+.celda button{position:absolute;inset:0;width:100%}
+.celda .ancla{position:absolute;left:50%;top:calc(var(--via) + var(--g) / 2);width:0;height:0;--d:15px}
+.celda .nombre{font-size:12.5px}
+.celda .punto{border-color:var(--t0)}
+.celda.aqui .nombre{background:#fff23a;text-shadow:none;color:var(--tinta)}
+.celda.aqui .punto{border-color:var(--tinta)}
+.celda button:focus-visible .punto{box-shadow:0 0 0 3px var(--tinta)}
+
+.contenido{max-width:560px;margin:0 auto;padding:18px max(20px,env(safe-area-inset-right,0px)) 96px max(20px,env(safe-area-inset-left,0px));min-height:calc(100% - var(--alto) - 10px)}
+.contenido>*{animation:entra .22s ease-out both}
+@keyframes entra{from{opacity:0;transform:translateY(6px)}}
+/* parada que es un link: un solo botón, a dónde va y listo */
+.salida{display:flex;flex-direction:column;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:11vh auto 0;padding:20px 38px 18px;border-radius:999px;color:var(--papel);text-align:center;
+  background:linear-gradient(to bottom,var(--t2),var(--c) 40%,var(--c) 62%,var(--t0));box-shadow:inset 0 2px 0 var(--t3),inset 0 -2px 0 color-mix(in srgb,var(--t0) 75%,#000),3px 6px 10px rgba(0,0,0,.2)}
+.salida:active{transform:translateY(1px)}
+.salida b{font-size:23px;font-weight:600;line-height:1.1}
+.salida span{font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.92}
+.pronto{margin:13vh 0 0;text-align:center;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
+/* columnitas: se elige deslizando los nombres; la del centro es la que se lee */
+.rueda{display:flex;gap:4px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -20px;padding:2px 50%;
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(to right,transparent,#000 22%,#000 78%,transparent)}
+.rueda::-webkit-scrollbar{display:none}
+.rueda button{flex:none;scroll-snap-align:center;padding:10px 12px;font-size:15px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:var(--tinta);opacity:.32;transition:opacity .15s}
+.rueda button.aqui{opacity:1;color:var(--c)}
+.texto{margin-top:22px;font-size:17.5px;line-height:1.55;overflow-wrap:break-word}
+.texto h2{margin:0 0 4px;font-size:21px;line-height:1.2;font-weight:600}
+.texto .dato{margin:0 0 20px;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.texto .sangria{padding-left:1.8em}
+.texto .cursiva{font-style:italic}
+.texto a{color:var(--c);text-decoration:underline;text-underline-offset:3px}
+@media (prefers-reduced-motion:reduce){.contenido>*{animation:none}}
 </style>
 </head>
 <body>
-<div class="pagina">
+<div class="pagina" id="inicio">
   <h1>PANFLITO</h1>
   <div class="mapa" id="mapa">
-    <img src="img/mapa.png" width="1400" height="1400" fetchpriority="high" alt="Casa del árbol dibujada en marcador: cada tramo de color es una línea">
+    <img id="dibujo" src="img/mapa.png" width="1400" height="1400" fetchpriority="high" alt="Casa del árbol dibujada en marcador: cada tramo de color es una línea">
     <ul class="paradas" id="paradas" aria-label="Paradas"></ul>
   </div>
 </div>
 
+<div class="vista" id="vista" hidden>
+  <div class="barra">
+    <button class="casita" id="casita" aria-label="Volver al dibujo"><img src="img/mapa.png" alt=""></button>
+    <nav class="riel" id="riel" aria-label="Recorrido"><ol class="via" id="via"></ol></nav>
+  </div>
+  <main class="contenido" id="contenido"></main>
+</div>
+
 <script>
 (()=>{
+const $=id=>document.getElementById(id);
 const contar=(ev,datos)=>{try{window.gtag&&gtag('event',ev,datos)}catch(e){}};
-fetch('mapa.json').then(r=>r.json()).then(M=>{
-  const ul=document.getElementById('paradas');
+const slug=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const quieto=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const inicio=$('inicio'),mapa=$('mapa'),dibujo=$('dibujo'),vista=$('vista'),riel=$('riel'),via=$('via'),cont=$('contenido'),casita=$('casita');
+let M,E=[],n=0,actual=-1,abierta=false,animando=null;
+
+const tonos=(el,l)=>{el.style.setProperty('--c',l.tonos[1]);l.tonos.forEach((t,i)=>el.style.setProperty('--t'+i,t))};
+const ancho=()=>via.firstElementChild?via.firstElementChild.offsetWidth:150;
+
+fetch('mapa.json').then(r=>r.json()).then(datos=>{
+  M=datos;
+  // recorrido: las líneas en orden, y de cada una primero la principal y después las chicas. Es circular.
+  M.orden.forEach(k=>{const l=M.lineas[k];
+    M.paradas.filter(p=>p.linea==k).sort((a,b)=>(a.tipo==='principal'?0:1)-(b.tipo==='principal'?0:1))
+     .forEach(p=>E.push({p,l,k,id:slug(p.nombre)}))});
+  n=E.length;
+  // inicio: las paradas sobre el dibujo. Tocar cualquiera abre la principal de su línea.
+  const ul=$('paradas');
   M.paradas.forEach(p=>{
-    const l=M.lineas[p.linea],li=document.createElement('li');
+    const l=M.lineas[p.linea],li=document.createElement('li'),b=document.createElement('button');
     li.className='parada '+p.tipo;li.style.left=(p.x*100)+'%';li.style.top=(p.y*100)+'%';li.style.setProperty('--c',l.tonos[1]);
-    let dentro='<span class="punto"></span>';
-    if(p.tipo==='principal'&&p.nombre){const n=document.createElement('span');n.className='nombre';n.textContent=p.nombre;dentro+=n.outerHTML}
-    if(p.url){
-      const a=document.createElement('a');a.href=p.url;a.target='_blank';a.rel='noopener';a.innerHTML=p.tipo==='principal'?dentro:'';
-      if(p.nombre)a.setAttribute('aria-label',p.nombre);
-      a.addEventListener('click',()=>contar('abrir_parada',{linea:l.letra,parada:p.nombre}));
-      if(p.tipo==='principal')li.appendChild(a);else{li.innerHTML=dentro;li.appendChild(a)}
-    }else{
-      li.innerHTML=dentro;if(p.nombre)li.setAttribute('aria-label',p.nombre);
-    }
-    ul.appendChild(li);
+    b.type='button';b.innerHTML='<span class="punto"></span>';
+    const pr=E.find(e=>e.k==p.linea);
+    b.setAttribute('aria-label',p.tipo==='principal'?p.nombre:pr.p.nombre);
+    if(p.tipo==='principal'){const s=document.createElement('span');s.className='nombre';s.textContent=p.nombre;b.appendChild(s)}
+    b.addEventListener('click',ev=>abrirLinea(p.linea,ev));
+    li.appendChild(b);ul.appendChild(li);
   });
+  // la línea recta: tres vueltas seguidas para que no tenga principio ni fin
+  for(let v=0;v<3;v++)E.forEach((e,i)=>{
+    const li=document.createElement('li'),b=document.createElement('button');
+    li.className='celda';li.dataset.i=i;tonos(li,e.l);
+    b.type='button';if(v!==1){b.tabIndex=-1;b.setAttribute('aria-hidden','true')}
+    b.innerHTML='<span class="ancla"><span class="punto"></span><span class="nombre"></span></span>';
+    b.querySelector('.nombre').textContent=e.p.nombre;
+    b.addEventListener('click',()=>ir(i,true));
+    li.appendChild(b);via.appendChild(li);
+  });
+  desdeHash(false);
 }).catch(()=>{});
+
+/* ---- tocar la tinta del dibujo: se mira de qué color es el trazo más cercano ---- */
+let lienzo=null;
+dibujo.addEventListener('click',ev=>{
+  if(!M)return;
+  const N=350,r=dibujo.getBoundingClientRect();
+  if(!lienzo){const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(dibujo,0,0,N,N);lienzo=x.getImageData(0,0,N,N).data}
+  const px=Math.round((ev.clientX-r.left)/r.width*N),py=Math.round((ev.clientY-r.top)/r.height*N),R=Math.round(N*22/r.width);
+  let mejor=null,dm=1e9;
+  for(let y=Math.max(0,py-R);y<=Math.min(N-1,py+R);y++)for(let x=Math.max(0,px-R);x<=Math.min(N-1,px+R);x++){
+    const o=(y*N+x)*4;if(lienzo[o+3]<140)continue;const d=(x-px)**2+(y-py)**2;if(d<dm&&d<=R*R){dm=d;mejor=o}}
+  if(mejor===null)return;
+  const c=[lienzo[mejor],lienzo[mejor+1],lienzo[mejor+2]];let k=null,dc=1e9;
+  for(const id in M.lineas)M.lineas[id].tonos.forEach(t=>{const v=parseInt(t.slice(1),16),d=(c[0]-(v>>16))**2+(c[1]-(v>>8&255))**2+(c[2]-(v&255))**2;if(d<dc){dc=d;k=id}});
+  if(k)abrirLinea(k,ev);
+});
+
+function abrirLinea(k,ev){const i=E.findIndex(e=>e.k==k);if(i<0)return;
+  history.pushState({v:1},'','#'+E[i].id);abrir(i,ev&&ev.clientX!=null?{x:ev.clientX,y:ev.clientY}:null)}
+
+/* ---- abrir / volver: el dibujo se achica hasta la casita y la línea sale desde donde se tocó ---- */
+function rectCasita(){const a=casita.getBoundingClientRect(),b=mapa.getBoundingClientRect();return `translate(${a.left-b.left}px,${a.top-b.top}px) scale(${a.width/b.width})`}
+function abrir(i,desde){
+  if(animando){animando.forEach(a=>a.finish())}
+  abierta=true;vista.hidden=false;document.body.classList.add('abierta');vista.scrollTop=0;
+  actual=-1;ir(i,false);
+  if(quieto||!desde||!vista.animate){inicio.classList.add('fuera');casita.classList.remove('espera');return}
+  casita.classList.add('espera');mapa.classList.add('vuela');
+  const op={duration:480,easing:'cubic-bezier(.5,0,.2,1)',fill:'both'};
+  const a1=mapa.animate([{transform:'none'},{transform:rectCasita()}],op);
+  const a2=vista.animate([{clipPath:`circle(0px at ${desde.x}px ${desde.y}px)`},{clipPath:`circle(150vmax at ${desde.x}px ${desde.y}px)`}],{duration:620,easing:'cubic-bezier(.4,0,.6,1)'});
+  animando=[a1,a2];
+  a1.onfinish=()=>{inicio.classList.add('fuera');casita.classList.remove('espera');mapa.classList.remove('vuela');a1.cancel();animando=null};
+}
+function cerrar(){
+  if(!abierta)return;if(animando){animando.forEach(a=>a.finish())}
+  abierta=false;actual=-1;document.body.classList.remove('abierta');inicio.classList.remove('fuera');
+  if(quieto||!vista.animate){vista.hidden=true;return}
+  casita.classList.add('espera');mapa.classList.add('vuela');
+  const a1=mapa.animate([{transform:rectCasita()},{transform:'none'}],{duration:440,easing:'cubic-bezier(.3,0,.2,1)',fill:'both'});
+  const a2=vista.animate([{opacity:1},{opacity:0}],{duration:300,fill:'both'});
+  animando=[a1,a2];
+  a1.onfinish=()=>{vista.hidden=true;a2.cancel();a1.cancel();mapa.classList.remove('vuela');casita.classList.remove('espera');animando=null};
+}
+casita.addEventListener('click',()=>{if(history.state&&history.state.v)history.back();else{history.replaceState(null,'',location.pathname+location.search);cerrar()}});
+addEventListener('popstate',()=>desdeHash(true));
+addEventListener('keydown',e=>{if(e.key==='Escape'&&abierta)casita.click()});
+function desdeHash(conAnim){
+  const [a,sub]=decodeURIComponent(location.hash.slice(1)).split('/'),i=E.findIndex(e=>e.id===a);
+  if(i<0){if(abierta)cerrar();return}
+  if(!abierta)abrir(i,null);else ir(i,true);
+  if(sub)elegida=sub;
+}
+
+/* ---- moverse por la línea ---- */
+function celdaDe(i){ // la copia de esa parada más cercana a donde está el riel ahora
+  const w=ancho(),c=riel.scrollLeft+riel.clientWidth/2;let m=null,d=1e9;
+  for(let v=0;v<3;v++){const x=(v*n+i+.5)*w,dd=Math.abs(x-c);if(dd<d){d=dd;m=x}}return m}
+function ir(i,suave){
+  const w=ancho(),x=(actual<0?(n+i+.5)*w:celdaDe(i))-riel.clientWidth/2;
+  riel.scrollTo({left:x,behavior:suave&&!quieto?'smooth':'auto'});
+  marcar(i);if(!suave)mostrar(i);
+}
+function marcar(i){
+  if(i===actual)return;actual=i;
+  via.querySelectorAll('.celda').forEach(c=>c.classList.toggle('aqui',+c.dataset.i===i));
+}
+let tFin=0,mostrada=-1;
+riel.addEventListener('scroll',()=>{
+  if(!abierta)return;
+  const w=ancho(),c=Math.round((riel.scrollLeft+riel.clientWidth/2)/w-.5);
+  marcar(((c%n)+n)%n);
+  clearTimeout(tFin);tFin=setTimeout(()=>{
+    if(!abierta)return;
+    const c2=Math.round((riel.scrollLeft+riel.clientWidth/2)/w-.5);
+    if(c2<n||c2>=2*n)riel.scrollLeft+=(c2<n?1:-1)*n*w;   // vuelve a la vuelta del medio sin que se note
+    if(mostrada!==actual){mostrar(actual);if(abierta)history.replaceState(history.state,'','#'+E[actual].id)}
+  },130);
+},{passive:true});
+addEventListener('resize',()=>{if(abierta&&actual>=0){const i=actual;actual=-1;ir(i,false)}});
+
+/* ---- lo que hay en cada parada ---- */
+let cols=null,elegida=null;
+function mostrar(i){
+  mostrada=i;const e=E[i],p=e.p;tonos(cont,e.l);cont.textContent='';vista.scrollTop=0;
+  contar('ver_parada',{linea:e.l.letra,parada:p.nombre});
+  if(p.url){
+    const a=document.createElement('a');a.className='salida';a.href=p.url;a.target='_blank';a.rel='noopener';
+    const b=document.createElement('b');b.textContent=p.nombre.replace(/\s*\(.*\)$/,'');a.appendChild(b);
+    if(p.destino){const s=document.createElement('span');s.textContent=p.destino+' ↗';a.appendChild(s)}
+    a.addEventListener('click',()=>contar('abrir_parada',{linea:e.l.letra,parada:p.nombre}));
+    cont.appendChild(a);
+  }else if(p.contenido==='columnitas'){
+    (cols=cols||fetch('columnitas.json').then(r=>r.json())).then(C=>{if(mostrada===i)columnitas(C)}).catch(()=>{cols=null});
+  }else{
+    const d=document.createElement('p');d.className='pronto';d.textContent='Pronto';cont.appendChild(d);
+  }
+}
+function columnitas(C){
+  const rueda=document.createElement('div'),texto=document.createElement('article');rueda.className='rueda';texto.className='texto';
+  let sel=-1,t=0;
+  const elegir=(j,mover)=>{
+    if(mover){const b=rueda.children[j];rueda.scrollTo({left:b.offsetLeft+b.offsetWidth/2-rueda.clientWidth/2,behavior:mover==='suave'&&!quieto?'smooth':'auto'})}
+    if(j===sel)return;sel=j;const c=C[j];elegida=c.id;
+    [...rueda.children].forEach((b,k)=>b.classList.toggle('aqui',k===j));
+    texto.innerHTML='<h2></h2><p class="dato"></p><div></div>';
+    texto.children[0].textContent=c.titulo;texto.children[1].textContent=c.tipo+' · '+c.anio;texto.children[2].innerHTML=c.html;
+    if(abierta&&E[actual]&&E[actual].p.contenido==='columnitas')history.replaceState(history.state,'','#'+E[actual].id+'/'+c.id);
+    contar('leer_columnita',{columnita:c.nombre});
+  };
+  C.forEach((c,j)=>{const b=document.createElement('button');b.type='button';b.textContent=c.nombre;b.addEventListener('click',()=>elegir(j,'suave'));rueda.appendChild(b)});
+  rueda.addEventListener('scroll',()=>{clearTimeout(t);t=setTimeout(()=>{
+    const m=rueda.scrollLeft+rueda.clientWidth/2;let j=0,d=1e9;
+    [...rueda.children].forEach((b,k)=>{const dd=Math.abs(b.offsetLeft+b.offsetWidth/2-m);if(dd<d){d=dd;j=k}});elegir(j,false)},90)},{passive:true});
+  cont.append(rueda,texto);
+  const j0=Math.max(0,C.findIndex(c=>c.id===elegida));elegir(j0,'ya');
+}
 })();
 </script>
 </body>
