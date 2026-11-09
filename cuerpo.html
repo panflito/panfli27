@@ -5,6 +5,9 @@
 <link rel="preload" href="piezas.json" as="fetch" crossorigin>
 <link rel="preload" href="img/verde-parada.webp" as="image">
 <link rel="preload" href="img/verde-arranque.webp" as="image">
+<!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
 <style>
@@ -129,6 +132,8 @@ const R=d=>d*Math.PI/180;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const suave=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
 const lerp=(a,b,t)=>a+(b-a)*t;
+// cuenta una acción en las estadísticas (si no cargaron, no pasa nada)
+const contar=(ev,datos)=>{try{window.gtag&&gtag('event',ev,datos)}catch(e){}};
 
 let P,D,lineas=[],geo=null,elegida=0,cambio=null;
 
@@ -156,7 +161,7 @@ function armar(){
     ch.forEach(p=>g.appendChild(p.el));
     // chapa para elegir la línea desde la portada
     const t=document.createElement('a');t.className='toque';t.href='#linea-'+l.id;t.setAttribute('aria-label','Línea '+l.letra+': '+l.nombre);t.innerHTML=chapa(l);
-    t.addEventListener('click',e=>{e.preventDefault();elegir(li,true)});
+    t.addEventListener('click',e=>{e.preventDefault();elegir(li,true,'portada')});
     g.appendChild(t);via.appendChild(g);
 
     // cartel y paradas (solo se muestran los de la línea elegida)
@@ -176,11 +181,12 @@ function armar(){
         const on=()=>p.el.classList.add('alzada'),off=()=>p.el.classList.remove('alzada');
         r.addEventListener('pointerenter',on);r.addEventListener('pointerleave',off);r.addEventListener('focus',on);r.addEventListener('blur',off);
       }
+      if(tag==='a')r.addEventListener('click',()=>contar('abrir_parada',{linea:l.nombre,parada:pa.titulo,tipo:pa.tipo}));
       caja.appendChild(r);rotulos.push({r,p});
     });
     rot.appendChild(caja);
     const a=document.createElement('a');a.href='#linea-'+l.id;a.dataset.i=li;a.setAttribute('aria-label',l.nombre);a.innerHTML=chapa(l);
-    a.addEventListener('click',e=>{e.preventDefault();elegir(li,true)});nav.appendChild(a);
+    a.addEventListener('click',e=>{e.preventDefault();elegir(li,true,'tablero')});nav.appendChild(a);
     lineas.push({l,li,g,ch,toque:t,caja,cartel:c,rotulos});
   });
 }
@@ -272,11 +278,13 @@ function cuadro(){
   lineas.forEach((o,i)=>{const ver=i===elegida;o.caja.hidden=!ver;if(ver)o.caja.style.opacity=op;o.caja.style.visibility=op<0.02?'hidden':'visible'});
   $('pista').style.opacity=1-suave(t/0.3);
   $('tablero').classList.toggle('ver',t>0.85);
+  if(t>=1&&!cuadro.bajo){cuadro.bajo=true;contar('bajar_por_linea',{linea:lineas[elegida].l.nombre})}
   if(cambio&&u>=1){cambio=null;alto()}
   if(cambio)requestAnimationFrame(cuadro);
 }
 
-function elegir(i,bajar){
+function elegir(i,bajar,desde){
+  contar('elegir_linea',{linea:lineas[i].l.nombre,desde:desde||'otro'});
   if(i!==elegida){
     cambio={de:elegida,t0:performance.now()};elegida=i;
     try{history.replaceState(null,'','#linea-'+lineas[i].l.id)}catch(e){}
@@ -295,7 +303,7 @@ const alScroll=()=>{if(pedido)return;pedido=true;requestAnimationFrame(()=>{pedi
 Promise.all([fetch('piezas.json').then(r=>r.json()),fetch('paradas.json').then(r=>r.json())]).then(([p,d])=>{
   P=p;D=d;armar();
   const h=location.hash.replace('#linea-','');const ini=lineas.findIndex(o=>o.l.id===h);
-  if(ini>=0)elegida=ini;
+  if(ini>=0){elegida=ini;contar('elegir_linea',{linea:lineas[ini].l.nombre,desde:'link directo'})}
   $('nav').querySelectorAll('a').forEach(a=>a.setAttribute('aria-current',+a.dataset.i===elegida));
   const listo=()=>{medir();cuadro()};
   const img=$('mesa').querySelector('img');
