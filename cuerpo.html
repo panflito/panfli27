@@ -19,7 +19,8 @@ a{color:inherit;text-decoration:none}
 /* el nombre queda para Google y lectores de pantalla; a la vista, solo el dibujo */
 h1{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0}
 .pagina{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:72px 64px}
-.mapa{position:relative;width:100%;max-width:520px;margin:0 auto}
+/* la tinta del dibujo va del 4,36% al 94,07% del ancho de la imagen: se corre 0,79% a la derecha para que quede centrada */
+.mapa{position:relative;width:100%;max-width:520px;margin:0 auto;left:.79%}
 .mapa img{display:block;width:100%;height:auto;filter:drop-shadow(1px 2px 2px rgba(0,0,0,.18))}
 .paradas{list-style:none;margin:0;padding:0}
 /* parada: circulito de estación sobre la línea */
