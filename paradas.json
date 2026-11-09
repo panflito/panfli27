@@ -33,104 +33,20 @@
       "color": "amarillo",
       "paradas": [
         {
-          "titulo": "bandalos chinos",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/bandalos%20chinos.html"
+          "titulo": "",
+          "tipo": "espacio"
         },
         {
-          "titulo": "luis",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/luis.html"
+          "titulo": "",
+          "tipo": "espacio"
         },
         {
-          "titulo": "jonatan leandoer96",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/jonatanleandoer96.html"
+          "titulo": "",
+          "tipo": "espacio"
         },
         {
-          "titulo": "pete sampras",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/pete%20sampras.html"
-        },
-        {
-          "titulo": "pacifica",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/pacifica.html"
-        },
-        {
-          "titulo": "chapi",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/chapi.html"
-        },
-        {
-          "titulo": "casa del árbol",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/casa%20del%20arbol.html"
-        },
-        {
-          "titulo": "theo y simón",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/theo%20y%20simon.html"
-        },
-        {
-          "titulo": "tango astral",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/tango%20astral.html"
-        },
-        {
-          "titulo": "anabella cartolano",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/anabella%20cartolano.html"
-        },
-        {
-          "titulo": "erica",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/erica.html"
-        },
-        {
-          "titulo": "chechi de marcos",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/chechi.html"
-        },
-        {
-          "titulo": "king krule",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/king%20krule.html"
-        },
-        {
-          "titulo": "el príncipe idiota",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/el%20principe%20idiota.html"
-        },
-        {
-          "titulo": "lara91k",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/lara91k.html"
-        },
-        {
-          "titulo": "winona riders",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/winona%20riders.html"
-        },
-        {
-          "titulo": "mi amigo invensible",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/mi%20amigo%20invensible.html"
-        },
-        {
-          "titulo": "diosque",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/diosque.html"
-        },
-        {
-          "titulo": "cuando / coraje",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/cuando.html"
-        },
-        {
-          "titulo": "encargo",
-          "tipo": "texto",
-          "url": "https://panflito.com/textos/encargo.html"
+          "titulo": "columnitas",
+          "tipo": "pronto"
         }
       ]
     },
@@ -141,9 +57,12 @@
       "color": "azul",
       "paradas": [
         {
-          "titulo": "Foundation",
-          "tipo": "link",
-          "url": "https://foundation.app/@theofn"
+          "titulo": "",
+          "tipo": "espacio"
+        },
+        {
+          "titulo": "",
+          "tipo": "espacio"
         }
       ]
     }

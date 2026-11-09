@@ -36,7 +36,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--tinta);outline-offs
 
 .pagina{position:relative;overflow:clip;max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 0}
 .inicio{display:grid;justify-items:center;position:relative;z-index:1}
-.inicio h1{font-family:var(--titulo);font-weight:600;font-size:clamp(30px,9vw,46px);letter-spacing:.14em;margin:0 0 6px;padding-left:.14em;line-height:1.1}
+/* el nombre queda para Google y lectores de pantalla; a la vista, solo el dibujo */
+.inicio h1{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0}
 .mesa{width:100%;max-width:520px}
 .mesa img{display:block;width:100%;height:auto}
 
@@ -104,7 +105,6 @@ dialog button{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right
 
 <footer id="pie">
   <a href="https://www.instagram.com/theofernandezn/" target="_blank" rel="noopener">Instagram ↗</a>
-  <a href="https://foundation.app/@theofn" target="_blank" rel="noopener">Foundation ↗</a>
 </footer>
 
 <dialog id="visor" aria-label="Imagen">
@@ -171,7 +171,8 @@ function armar(){
     // cartel y paradas (solo se muestran los de la línea elegida)
     const caja=document.createElement('div');caja.className='paradas';caja.hidden=true;
     const rotulos=[];
-    ch.filter(p=>p.parada).forEach(p=>{
+    // los «espacios» son paradas sin nada todavía: la pieza está, el cartel no
+    ch.filter(p=>p.parada&&p.parada.tipo!=='espacio').forEach(p=>{
       const pa=p.parada,ext=pa.tipo==='link';
       const tag=(pa.tipo==='pronto'||(!pa.url&&!pa.imagen))?'div':'a';
       const r=document.createElement(tag);r.className='rotulo'+(tag==='div'?' sin':'');r.style.setProperty('--c',`var(${VAR[l.color]})`);
@@ -203,7 +204,7 @@ function medir(){
   const W=mr.width,ox=mr.left-pr.left,oy=mr.top-pr.top;
   const gut=parseFloat(getComputedStyle(pag).paddingLeft)||16;
   const desv=(P.verde.codo.cxIn-P.verde.codo.cxOut)*K;
-  geo={W,ox,oy,baseX:gut+desv+P.verde.parada.cx*K+2,viaY:oy+.915*W,rango:Math.max(260,W*0.95),ancho:pag.clientWidth};
+  geo={W,ox,oy,baseX:gut+desv+P.verde.parada.cx*K+2,viaY:oy+.915*W,rango:Math.max(200,oy+.915*W-72),ancho:pag.clientWidth};
   const orden=lineas.map(o=>CUELGA[o.l.color].x);
   lineas.forEach(o=>{
     const c=CUELGA[o.l.color];
