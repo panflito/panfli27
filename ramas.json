@@ -1,0 +1,48 @@
+{
+ "radio": 26,
+ "paral": 50,
+ "ritmo": 1.3,
+ "cruce": 1.18,
+ "cruces": 0.5,
+ "nombres": "si",
+ "azar": 0.46,
+ "punto": 0.46,
+ "letra": 12.5,
+ "g": 15.5,
+ "suave": 0.36,
+ "osc": 0.46,
+ "clara": 0.4,
+ "transp": 0.36,
+ "lado": -0.85,
+ "lsombra": 1.5,
+ "lbrillo": 4,
+ "pbrillo": 0.55,
+ "sombraP": 12,
+ "sep": 74,
+ "colores": {
+  "verde": [
+   "#296034",
+   "#2e6a3a",
+   "#35743f",
+   "#557f5c"
+  ],
+  "rojo": [
+   "#723631",
+   "#c22f2b",
+   "#d03430",
+   "#d55958"
+  ],
+  "amarillo": [
+   "#865f33",
+   "#b89034",
+   "#c29938",
+   "#cea554"
+  ],
+  "azul": [
+   "#437cb3",
+   "#4783bc",
+   "#4f8cc6",
+   "#6b9fd7"
+  ]
+ }
+}
