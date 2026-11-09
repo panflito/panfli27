@@ -1,0 +1,62 @@
+{
+  "lineas": [
+    {
+      "id": "d",
+      "letra": "D",
+      "nombre": "Theo y Simón",
+      "color": "verde",
+      "paradas": [
+        { "titulo": "Escuchar en Spotify", "tipo": "link", "detalle": "Spotify", "url": "https://open.spotify.com/intl-es/artist/2Ab0XAShZJTAEQoJFq0nRM" },
+        { "titulo": "Último piso", "tipo": "link", "detalle": "Videoclip · YouTube", "url": "https://www.youtube.com/watch?v=lta22JNHBfY" },
+        { "titulo": "theoysimon.com", "tipo": "pronto", "detalle": "En obra" }
+      ]
+    },
+    {
+      "id": "b",
+      "letra": "B",
+      "nombre": "YouTube",
+      "color": "rojo",
+      "paradas": [
+        { "titulo": "El Ahijado", "tipo": "link", "detalle": "Canal de YouTube", "url": "https://www.youtube.com/@ElAhijado4" }
+      ]
+    },
+    {
+      "id": "h",
+      "letra": "H",
+      "nombre": "Escritos",
+      "color": "amarillo",
+      "paradas": [
+        { "titulo": "bandalos chinos", "tipo": "texto", "url": "https://panflito.com/textos/bandalos%20chinos.html" },
+        { "titulo": "luis", "tipo": "texto", "url": "https://panflito.com/textos/luis.html" },
+        { "titulo": "jonatan leandoer96", "tipo": "texto", "url": "https://panflito.com/textos/jonatanleandoer96.html" },
+        { "titulo": "pete sampras", "tipo": "texto", "url": "https://panflito.com/textos/pete%20sampras.html" },
+        { "titulo": "pacifica", "tipo": "texto", "url": "https://panflito.com/textos/pacifica.html" },
+        { "titulo": "chapi", "tipo": "texto", "url": "https://panflito.com/textos/chapi.html" },
+        { "titulo": "casa del árbol", "tipo": "texto", "url": "https://panflito.com/textos/casa%20del%20arbol.html" },
+        { "titulo": "theo y simón", "tipo": "texto", "url": "https://panflito.com/textos/theo%20y%20simon.html" },
+        { "titulo": "tango astral", "tipo": "texto", "url": "https://panflito.com/textos/tango%20astral.html" },
+        { "titulo": "anabella cartolano", "tipo": "texto", "url": "https://panflito.com/textos/anabella%20cartolano.html" },
+        { "titulo": "erica", "tipo": "texto", "url": "https://panflito.com/textos/erica.html" },
+        { "titulo": "chechi de marcos", "tipo": "texto", "url": "https://panflito.com/textos/chechi.html" },
+        { "titulo": "king krule", "tipo": "texto", "url": "https://panflito.com/textos/king%20krule.html" },
+        { "titulo": "el príncipe idiota", "tipo": "texto", "url": "https://panflito.com/textos/el%20principe%20idiota.html" },
+        { "titulo": "lara91k", "tipo": "texto", "url": "https://panflito.com/textos/lara91k.html" },
+        { "titulo": "winona riders", "tipo": "texto", "url": "https://panflito.com/textos/winona%20riders.html" },
+        { "titulo": "mi amigo invensible", "tipo": "texto", "url": "https://panflito.com/textos/mi%20amigo%20invensible.html" },
+        { "titulo": "diosque", "tipo": "texto", "url": "https://panflito.com/textos/diosque.html" },
+        { "titulo": "cuando / coraje", "tipo": "texto", "url": "https://panflito.com/textos/cuando.html" },
+        { "titulo": "encargo", "tipo": "texto", "url": "https://panflito.com/textos/encargo.html" }
+      ]
+    },
+    {
+      "id": "a",
+      "letra": "A",
+      "nombre": "Arte visual",
+      "color": "azul",
+      "paradas": [
+        { "titulo": "Foundation", "tipo": "link", "detalle": "Obras en foundation.app", "url": "https://foundation.app/@theofn" },
+        { "titulo": "La casa del árbol", "tipo": "imagen", "detalle": "Marcador sobre servilleta · ejemplo", "imagen": "img/casa.png" }
+      ]
+    }
+  ]
+}
