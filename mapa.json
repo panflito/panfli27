@@ -1,0 +1,122 @@
+{
+ "lineas": {
+  "1": {
+   "letra": "Y",
+   "color": "rojo",
+   "tonos": [
+    "#723631",
+    "#c22f2b",
+    "#d03430",
+    "#d55958"
+   ]
+  },
+  "2": {
+   "letra": "P",
+   "color": "amarillo",
+   "tonos": [
+    "#865f33",
+    "#b89034",
+    "#c29938",
+    "#cea554"
+   ]
+  },
+  "3": {
+   "letra": "S",
+   "color": "verde",
+   "tonos": [
+    "#296034",
+    "#2e6a3a",
+    "#35743f",
+    "#557f5c"
+   ]
+  },
+  "4": {
+   "letra": "V",
+   "color": "violeta",
+   "tonos": [
+    "#4a2a66",
+    "#673b8a",
+    "#7a4d9e",
+    "#9d78bd"
+   ]
+  },
+  "5": {
+   "letra": "T",
+   "color": "azul",
+   "tonos": [
+    "#437cb3",
+    "#4783bc",
+    "#4f8cc6",
+    "#6b9fd7"
+   ]
+  }
+ },
+ "paradas": [
+  {
+   "x": 0.5539,
+   "y": 0.321,
+   "linea": 5,
+   "tipo": "principal",
+   "nombre": "Cuentos"
+  },
+  {
+   "x": 0.1216,
+   "y": 0.1062,
+   "linea": 3,
+   "tipo": "principal",
+   "nombre": "Theo y Simón",
+   "url": "https://open.spotify.com/intl-es/artist/2Ab0XAShZJTAEQoJFq0nRM"
+  },
+  {
+   "x": 0.1999,
+   "y": 0.3271,
+   "linea": 1,
+   "tipo": "principal",
+   "nombre": "YouTube",
+   "url": "https://www.youtube.com/@ElAhijado4"
+  },
+  {
+   "x": 0.2965,
+   "y": 0.6662,
+   "linea": 2,
+   "tipo": "principal",
+   "nombre": "Design&T."
+  },
+  {
+   "x": 0.6813,
+   "y": 0.4457,
+   "linea": 4,
+   "tipo": "principal",
+   "nombre": "Calcos"
+  },
+  {
+   "x": 0.3787,
+   "y": 0.0621,
+   "linea": 3,
+   "tipo": "chica",
+   "nombre": "Ultimo Piso (video)",
+   "url": "https://www.youtube.com/watch?v=lta22JNHBfY"
+  },
+  {
+   "x": 0.8267,
+   "y": 0.4894,
+   "linea": 4,
+   "tipo": "chica",
+   "nombre": "xx"
+  },
+  {
+   "x": 0.1316,
+   "y": 0.7091,
+   "linea": 2,
+   "tipo": "chica",
+   "nombre": "T. Animacion"
+  },
+  {
+   "x": 0.8228,
+   "y": 0.1479,
+   "linea": 5,
+   "tipo": "chica",
+   "nombre": "Columnitas"
+  }
+ ]
+}

@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con cuatro líneas: Theo y Simón, YouTube, escritos y arte visual.">
 <title>PANFLITO</title>
-<link rel="preload" href="img/casa.png" as="image" fetchpriority="high">
-<link rel="preload" href="paradas.json" as="fetch" crossorigin>
-<link rel="preload" href="ramas.json" as="fetch" crossorigin>
+<link rel="preload" href="img/mapa.png" as="image" fetchpriority="high">
+<link rel="preload" href="mapa.json" as="fetch" crossorigin>
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
@@ -18,9 +17,9 @@
 <style>
 body{margin:0}
 
-/* layout: la casa arriba; de ella salen las líneas como en un plano de subte y bajan por toda la página */
+/* layout: solo el dibujo. Su línea es el mapa: cada tramo de color es una línea, con sus paradas encima */
 :root{
-  --papel:#fbfaf7; --tinta:#141312; --gris:#7a766e;
+  --papel:#fbfaf7; --tinta:#141312;
   --titulo:"Gill Sans","Gill Sans MT","Gill Sans Nova",Lato,"Trebuchet MS",sans-serif;
   color-scheme:light;
 }
@@ -28,197 +27,60 @@ body{margin:0}
 html{overflow-x:clip}
 body{margin:0;background:var(--papel);color:var(--tinta);font-family:var(--titulo);overflow-x:clip}
 a{color:inherit;text-decoration:none}
-a:focus-visible{outline:2px solid var(--tinta);outline-offset:3px}
-
-.pagina{position:relative;overflow:clip;max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 0}
 /* el nombre queda para Google y lectores de pantalla; a la vista, solo el dibujo */
 h1{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0}
-.mesa{position:relative;z-index:1;width:100%;max-width:520px;margin:0 auto}
-.mesa img{display:block;width:100%;height:auto}
-#lineas{position:absolute;left:0;top:0;z-index:2;pointer-events:none}
-.paradas{position:absolute;inset:0;z-index:3;pointer-events:none;margin:0;padding:0;list-style:none}
-/* nombre de parada en diagonal hacia arriba, como en el plano del subte */
-.parada{position:absolute;left:0;top:0;pointer-events:auto;white-space:nowrap;font-weight:600;line-height:1;transform-origin:0 0;
-  text-shadow:0 0 2px var(--papel),0 0 2px var(--papel),0 0 3px var(--papel)}
-.parada a{display:inline-block;padding:3px 2px}
-.parada a:hover,.parada a:active,.parada a:focus-visible{background:#fff23a}
-.parada.sin{color:var(--gris)}
+.pagina{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:72px 64px}
+.mapa{position:relative;width:100%;max-width:520px;margin:0 auto}
+.mapa img{display:block;width:100%;height:auto;filter:drop-shadow(1px 2px 2px rgba(0,0,0,.18))}
+.paradas{list-style:none;margin:0;padding:0}
+/* parada: circulito de estación sobre la línea */
+.parada{position:absolute;width:0;height:0}
+.parada .punto{position:absolute;left:0;top:0;width:var(--d);height:var(--d);margin:calc(var(--d) / -2) 0 0 calc(var(--d) / -2);border-radius:50%;
+  background:var(--papel);border:calc(var(--d) * .27) solid var(--c);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.parada.principal{--d:15px}
+.parada.chica{--d:9px}
+/* nombre en diagonal hacia arriba, como en el plano del subte */
+.parada .nombre{position:absolute;left:7px;bottom:5px;white-space:nowrap;font-weight:600;font-size:13.5px;line-height:1;color:var(--c);transform-origin:0 100%;transform:rotate(-45deg);padding:3px 2px;
+  text-shadow:0 0 2px var(--papel),0 0 2px var(--papel),0 0 4px var(--papel),0 0 4px var(--papel)}
+/* zona de toque cómoda para el dedo */
+.parada a{position:absolute;left:-18px;top:-18px;width:36px;height:36px;border-radius:50%}
+.parada.principal a{width:auto;height:auto;left:0;top:0}
+.parada.principal a::before{content:"";position:absolute;left:-20px;top:-20px;width:40px;height:40px;border-radius:50%}
+.parada a:hover .nombre,.parada a:active .nombre,.parada a:focus-visible .nombre{background:#fff23a;text-shadow:none}
+.parada a:focus-visible{outline:none}
+.parada a:focus-visible .punto,.parada.chica a:focus-visible{box-shadow:0 0 0 3px var(--tinta)}
 </style>
 </head>
 <body>
-<div class="pagina" id="pagina">
+<div class="pagina">
   <h1>PANFLITO</h1>
-  <div class="mesa" id="mesa"><img src="img/casa.png" fetchpriority="high" alt="Casa del árbol dibujada en marcador sobre una servilleta" width="1400" height="1400"></div>
-  <canvas id="lineas" aria-hidden="true"></canvas>
-  <ul class="paradas" id="paradas" aria-label="Paradas"></ul>
+  <div class="mapa" id="mapa">
+    <img src="img/mapa.png" width="1400" height="1400" fetchpriority="high" alt="Casa del árbol dibujada en marcador: cada tramo de color es una línea">
+    <ul class="paradas" id="paradas" aria-label="Paradas"></ul>
+  </div>
 </div>
 
 <script>
 (()=>{
-/* ================= qué sale de dónde =================
-   Cada línea arranca en un punto del dibujo (fracción del ancho) y tiene su carril en el haz.
-   Las paradas de D y B se nombran hacia la izquierda; las de H y A hacia la derecha. */
-const LINEAS={
-  d:{x:.16,y:.915,lado:-1},
-  b:{x:.30,y:.915,lado:-1},
-  h:{x:.64,y:.86, lado:1},
-  a:{x:.86,y:.42, lado:1}
-};
-const LARGO=5200;
-const $=id=>document.getElementById(id);
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),suave=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
-const hex=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16));
-const mix=(a,b,k)=>{const A=hex(a),B=hex(b);return `rgb(${A.map((v,i)=>Math.round(v+(B[i]-v)*k)).join(',')})`};
-function azar(a,b){const x=Math.sin(a*127.1+b*311.7)*43758.5453;return x-Math.floor(x)}
 const contar=(ev,datos)=>{try{window.gtag&&gtag('event',ev,datos)}catch(e){}};
-
-/* ================= recorrido: como un plano de subte =================
-   Solo tramos verticales o a 45°. Todas las curvas tienen el mismo radio.
-   Las líneas viajan en paralelo; el haz se corre en diagonal cada tanto y a veces dos vecinas se cruzan. */
-function eventos(A,W,yb){
-  const ev=[];let y=yb,x=W*0.5,k=0;
-  while(y<yb+LARGO){
-    y+=(150+azar(91,k)*170)/A.ritmo;
-    const dx=(30+azar(17,k)*45)*A.cruce*(x>W*0.5?-1:1);
-    const d2=clamp(x+dx,W*0.4,W*0.56)-x;
-    if(Math.abs(d2)>8){ev.push({t:'haz',y0:y,y1:y+Math.abs(d2),dx:d2});x+=d2;y+=Math.abs(d2)}
-    y+=(110+azar(33,k)*140)/A.ritmo;
-    if(azar(77,k)<A.cruces){const a=Math.floor(azar(55,k)*3);ev.push({t:'cruce',a,y0:y,y1:y+A.paral+A.g});y+=A.paral+A.g}
-    k++;
-  }
-  return ev;
-}
-function redondear(v,r){
-  const out=[v[0]];
-  for(let i=1;i<v.length-1;i++){
-    const a=v[i-1],b=v[i],c=v[i+1];
-    const l1=Math.hypot(b.x-a.x,b.y-a.y),l2=Math.hypot(c.x-b.x,c.y-b.y);if(l1<1e-6||l2<1e-6)continue;
-    const u1={x:(b.x-a.x)/l1,y:(b.y-a.y)/l1},u2={x:(c.x-b.x)/l2,y:(c.y-b.y)/l2};
-    const cr=u1.x*u2.y-u1.y*u2.x,D=Math.acos(clamp(u1.x*u2.x+u1.y*u2.y,-1,1));
-    if(D<1e-3){out.push(b);continue}
-    let t=r*Math.tan(D/2),rr=r;const tm=Math.min(l1,l2)*0.5;if(t>tm){t=tm;rr=t/Math.tan(D/2)}
-    const p1={x:b.x-u1.x*t,y:b.y-u1.y*t},sg=cr>0?1:-1,n={x:-u1.y*sg,y:u1.x*sg};
-    const cx=p1.x+n.x*rr,cy=p1.y+n.y*rr,a0=Math.atan2(p1.y-cy,p1.x-cx),pasos=Math.max(4,Math.ceil(D*rr/2));
-    for(let k=0;k<=pasos;k++){const a=a0+sg*D*k/pasos;out.push({x:cx+Math.cos(a)*rr,y:cy+Math.sin(a)*rr})}
-  }
-  out.push(v[v.length-1]);return out;
-}
-function recorrido(ids,id,A,W,ox,oy,M){
-  const sp=A.g+A.paral,li=ids.indexOf(id);
-  const anclas=ids.map((k,i)=>({x:ox+LINEAS[k].x*M,y:oy+LINEAS[k].y*M,lane:(i-1.5)*sp}));
-  let yb=-Infinity;anclas.forEach(a=>{yb=Math.max(yb,a.y+24+Math.abs(W*0.5+a.lane-a.x))});
-  const ev=eventos(A,W,yb);
-  let orden=[0,1,2,3],trunk=W*0.5,lane=li;
-  const a=anclas[li],v=[{x:a.x,y:a.y}],xb=W*0.5+a.lane;
-  v.push({x:a.x,y:yb-Math.abs(xb-a.x)});v.push({x:xb,y:yb});
-  const X=()=>trunk+(lane-1.5)*sp;
-  const swap=e=>{orden=orden.slice();const t=orden[e.a];orden[e.a]=orden[e.a+1];orden[e.a+1]=t};
-  ev.forEach(e=>{
-    if(e.t==='haz'){v.push({x:X(),y:e.y0});trunk+=e.dx;v.push({x:X(),y:e.y1})}
-    else{const p=orden.indexOf(li);if(p===e.a||p===e.a+1){v.push({x:X(),y:e.y0});swap(e);lane=orden.indexOf(li);v.push({x:X(),y:e.y1})}else swap(e)}
+fetch('mapa.json').then(r=>r.json()).then(M=>{
+  const ul=document.getElementById('paradas');
+  M.paradas.forEach(p=>{
+    const l=M.lineas[p.linea],li=document.createElement('li');
+    li.className='parada '+p.tipo;li.style.left=(p.x*100)+'%';li.style.top=(p.y*100)+'%';li.style.setProperty('--c',l.tonos[1]);
+    let dentro='<span class="punto"></span>';
+    if(p.tipo==='principal'&&p.nombre){const n=document.createElement('span');n.className='nombre';n.textContent=p.nombre;dentro+=n.outerHTML}
+    if(p.url){
+      const a=document.createElement('a');a.href=p.url;a.target='_blank';a.rel='noopener';a.innerHTML=p.tipo==='principal'?dentro:'';
+      if(p.nombre)a.setAttribute('aria-label',p.nombre);
+      a.addEventListener('click',()=>contar('abrir_parada',{linea:l.letra,parada:p.nombre}));
+      if(p.tipo==='principal')li.appendChild(a);else{li.innerHTML=dentro;li.appendChild(a)}
+    }else{
+      li.innerHTML=dentro;if(p.nombre)li.setAttribute('aria-label',p.nombre);
+    }
+    ul.appendChild(li);
   });
-  v.push({x:X(),y:yb+LARGO+400});
-  const w=[v[0]];for(let i=1;i<v.length;i++){const p=v[i],q=w[w.length-1];if(Math.hypot(p.x-q.x,p.y-q.y)>0.5)w.push(p)}
-  const r=redondear(w,A.radio),pts=[];let s=0;
-  for(let i=0;i<r.length-1;i++){const p=r[i],q=r[i+1],L=Math.hypot(q.x-p.x,q.y-p.y),n=Math.max(1,Math.ceil(L/2));
-    for(let k=0;k<n;k++){const t=k/n;pts.push({x:p.x+(q.x-p.x)*t,y:p.y+(q.y-p.y)*t,s:s+L*t})}s+=L}
-  pts.push({x:r[r.length-1].x,y:r[r.length-1].y,s});
-  for(let i=0;i<pts.length;i++){const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)];pts[i].th=-Math.atan2(b.x-a.x,b.y-a.y)}
-  // en curvas y cruces no van paradas
-  pts.zonas=[{y0:-1e9,y1:yb+A.radio}].concat(ev.map(e=>({y0:e.y0-A.radio-14,y1:e.y1+A.radio+14})));
-  return pts;
-}
-// dónde caen las paradas (al azar, pero siempre igual) y dónde termina la línea
-function ubicar(li,n,A,pts){
-  const g=A.g,lista=[];let s=pts[0].s+g*2.6;
-  const idx=s=>Math.min(pts.length-1,Math.max(0,Math.round((s-pts[0].s)/2)));
-  const libre=s=>{const y=pts[idx(s)].y;return !pts.zonas.some(q=>y>q.y0&&y<q.y1)};
-  for(let k=0;k<n;k++){let t=0;while(!libre(s)&&t++<400)s+=4;lista.push(s);s+=A.sep*(1+(azar(li,k)-0.4)*1.3*A.azar)}
-  return {lista:lista.map(idx),fin:idx((lista.length?lista[lista.length-1]:s)+g*2.4)};
-}
-
-/* ================= el tubo: fundido de tonos, cara transparente, líneas finas ================= */
-function banda(c,pts,ancho,off,color){
-  if(ancho<=0.05)return;c.beginPath();
-  for(let i=0;i<pts.length;i++){const p=pts[i],X=p.x+Math.cos(p.th)*off,Y=p.y+Math.sin(p.th)*off;i?c.lineTo(X,Y):c.moveTo(X,Y)}
-  c.lineWidth=ancho;c.strokeStyle=color;c.lineCap='butt';c.lineJoin='round';c.stroke();
-}
-function tubo(c,pts,g,A,tono){
-  const N=Math.max(8,Math.round(g/1.4)),lado=A.lado||-1,suav=0.08+A.suave*0.9;
-  for(let i=0;i<N;i++){
-    const u=-1+(2*i+1)/N,luz=u*lado;let col,k;
-    if(luz<0){k=suave((-luz-(1-A.osc))/Math.max(0.05,suav*A.osc+0.05));col=mix(tono[1],tono[0],k)}
-    else{k=suave((luz-(1-A.clara))/Math.max(0.05,suav*A.clara+0.05));col=mix(tono[1],tono[2],k)}
-    banda(c,pts,g/N+0.6,u*g/2,col);
-  }
-  if(A.lsombra>0)banda(c,pts,A.lsombra,-lado*(g/2-A.lsombra/2),mix(tono[0],'#000000',.25));
-  if(A.lbrillo>0)banda(c,pts,A.lbrillo,lado*(g/2)*A.pbrillo,tono[3]);
-}
-function transparencia(c,pts,g,A){
-  if(A.transp<=0)return;const lado=A.lado||-1;
-  c.save();c.globalCompositeOperation='destination-out';
-  for(let i=0;i<6;i++){const w=g*(0.5-i*0.06);c.globalAlpha=A.transp*0.16;banda(c,pts,w,lado*(g/2-w/2),'#000')}
-  c.restore();
-}
-function tapa(c,pts,i,g,A,tono,alFinal){
-  const p=pts[i],dir=alFinal?1:-1,fx=-Math.sin(p.th)*dir,fy=Math.cos(p.th)*dir,ext=[];
-  for(let k=-3;k<=Math.ceil(g/4)+2;k++)ext.push({x:p.x+fx*k*2,y:p.y+fy*k*2,th:p.th});
-  c.save();c.beginPath();if(alFinal)c.arc(p.x,p.y,g/2,p.th,p.th+Math.PI);else c.arc(p.x,p.y,g/2,p.th+Math.PI,p.th+2*Math.PI);c.closePath();c.clip();
-  tubo(c,ext,g,A,tono);c.restore();
-}
-
-/* ================= armado ================= */
-let D=null,A=null;
-function armar(){
-  const pag=$('pagina'),mesa=$('mesa'),cv=$('lineas'),lista=$('paradas');
-  const W=pag.clientWidth,mr=mesa.getBoundingClientRect(),pr=pag.getBoundingClientRect();
-  const M=mr.width,ox=mr.left-pr.left,oy=mr.top-pr.top;
-  const ids=D.lineas.map(l=>l.id);
-  const datos=D.lineas.map((l,li)=>{const pts=recorrido(ids,l.id,A,W,ox,oy,M);const par=ubicar(li,l.paradas.length,A,pts);return {l,pts:pts.slice(0,par.fin+1),par}});
-  const alto=Math.max(...datos.map(d=>d.pts[d.pts.length-1].y))+90;
-  pag.style.height=alto+'px';
-  // lienzo del tamaño de toda la página: se dibuja una sola vez y al bajar no hay que redibujar nada
-  const dpr=Math.min(2,window.devicePixelRatio||1);
-  cv.width=Math.round(W*dpr);cv.height=Math.round(alto*dpr);cv.style.width=W+'px';cv.style.height=alto+'px';
-  const c=cv.getContext('2d'),capa=document.createElement('canvas');capa.width=cv.width;capa.height=cv.height;const cc=capa.getContext('2d');
-  c.clearRect(0,0,cv.width,cv.height);
-  lista.innerHTML='';
-  datos.forEach(({l,pts,par})=>{
-    const tono=A.colores[l.color],g=A.g,u=pts.length-1;
-    cc.setTransform(1,0,0,1,0,0);cc.clearRect(0,0,capa.width,capa.height);cc.setTransform(dpr,0,0,dpr,0,0);
-    tubo(cc,pts,g,A,tono);transparencia(cc,pts,g,A);
-    tapa(cc,pts,0,g,A,tono,false);tapa(cc,pts,u,g,A,tono,true);
-    // estaciones: circulito claro dentro de la línea (también en las dos puntas)
-    [0].concat(par.lista,[u]).forEach(i=>{const p=pts[i];cc.beginPath();cc.arc(p.x,p.y,g*A.punto/2,0,7);cc.fillStyle='#fbfaf7';cc.fill();
-      cc.lineWidth=0.8;cc.strokeStyle=mix(tono[0],'#000000',.1);cc.globalAlpha=0.35;cc.stroke();cc.globalAlpha=1});
-    c.save();c.setTransform(1,0,0,1,0,0);
-    if(A.sombraP>0){c.shadowColor='rgba(0,0,0,.2)';c.shadowBlur=A.sombraP*dpr;c.shadowOffsetX=A.sombraP*0.3*dpr;c.shadowOffsetY=A.sombraP*0.5*dpr}
-    c.drawImage(capa,0,0);c.restore();
-    // nombres: links en diagonal, del color de la línea
-    const lado=LINEAS[l.id].lado,color=mix(tono[1],'#000000',.12);
-    par.lista.forEach((i,k)=>{
-      const pa=l.paradas[k];if(!pa||!pa.titulo||pa.tipo==='espacio')return;
-      const p=pts[i],th=p.th+(lado<0?Math.PI:0),tx=p.x+Math.cos(th)*(g/2+5),ty=p.y+Math.sin(th)*(g/2+5);
-      const item=document.createElement('li');item.className='parada'+(pa.url?'':' sin');item.style.fontSize=A.letra+'px';if(pa.url)item.style.color=color;
-      const el=document.createElement(pa.url?'a':'span');el.textContent=pa.titulo;
-      if(pa.url){el.href=pa.url;if(pa.tipo==='link'){el.target='_blank';el.rel='noopener'}
-        el.addEventListener('click',()=>contar('abrir_parada',{linea:l.nombre,parada:pa.titulo,tipo:pa.tipo}))}
-      item.appendChild(el);lista.appendChild(item);
-      // girado 45° hacia arriba: los de la izquierda terminan en la parada, los de la derecha empiezan en ella
-      const w=item.offsetWidth,h=item.offsetHeight;
-      item.style.transform=lado<0?`translate(${tx}px,${ty}px) rotate(-45deg) translate(${-w}px,${-h*0.15}px)`:`translate(${tx}px,${ty}px) rotate(-45deg) translate(0,${-h*0.85}px)`;
-    });
-  });
-}
-
-Promise.all([fetch('paradas.json').then(r=>r.json()),fetch('ramas.json').then(r=>r.json())]).then(([d,a])=>{
-  D=d;A=a;
-  const img=$('mesa').querySelector('img');
-  const listo=()=>armar();
-  if(img.complete)listo();else img.addEventListener('load',listo);
-  let t=null,ancho=innerWidth;addEventListener('resize',()=>{if(innerWidth===ancho)return;ancho=innerWidth;clearTimeout(t);t=setTimeout(listo,120)});
-  if(document.fonts)document.fonts.ready.then(listo);
-}).catch(()=>{$('paradas').innerHTML='<li style="position:absolute;top:110%;color:var(--gris)">No se pudieron cargar las líneas. Recargá la página.</li>'});
+}).catch(()=>{});
 })();
 </script>
 </body>
