@@ -1,0 +1,320 @@
+<title>PANFLITO</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preload" href="img/casa.png" as="image" fetchpriority="high">
+<link rel="preload" href="paradas.json" as="fetch" crossorigin>
+<link rel="preload" href="piezas.json" as="fetch" crossorigin>
+<link rel="preload" href="img/verde-parada.webp" as="image">
+<link rel="preload" href="img/verde-arranque.webp" as="image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+/* layout: una sola vía de palitos escaneados que cuelga de la casa y baja por toda la página; cambia de línea en cada codo */
+:root{
+  --papel:#fbfaf7; --tinta:#141312; --gris:#7a766e; --raya:#e4e1da;
+  --d:#2D7539; --b:#C32D27; --h:#C3932D; --a:#4581BD;
+  --titulo:"Gill Sans","Gill Sans MT","Gill Sans Nova",Lato,"Trebuchet MS",sans-serif;
+  --texto:"EB Garamond","Times New Roman",Times,serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{overflow-x:clip}
+body{background:var(--papel);color:var(--tinta);font-family:var(--texto);font-size:18px;line-height:1.35;overflow-x:clip}
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid var(--tinta);outline-offset:3px}
+
+.pagina{position:relative;overflow:clip;max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 0}
+.inicio{display:grid;justify-items:center;position:relative;z-index:1}
+.inicio h1{font-family:var(--titulo);font-weight:600;font-size:clamp(30px,9vw,46px);letter-spacing:.14em;margin:0;padding-left:.14em;line-height:1.1}
+.pista{font-family:var(--titulo);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);margin:6px 0 4px;transition:opacity .3s}
+.mesa{width:100%;max-width:520px}
+.mesa img{display:block;width:100%;height:auto}
+
+/* la vía: piezas escaneadas encadenadas */
+.via{position:absolute;inset:0;z-index:2;pointer-events:none}
+.pieza{position:absolute;top:0;left:0;display:block;transform-origin:0 0;will-change:transform;filter:drop-shadow(1px 2px 1.5px rgba(0,0,0,.18));transition:filter .18s}
+.pieza.alzada{filter:drop-shadow(4px 8px 6px rgba(0,0,0,.3))}
+.ramal{position:absolute;inset:0;pointer-events:none;will-change:opacity}
+.ramal a{pointer-events:auto}
+
+/* chapas de línea */
+.chapa{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;font-family:var(--titulo);font-weight:700;font-size:17px;line-height:1;box-shadow:0 0 0 2px var(--papel);flex:none}
+.chapa.osc{color:#1d1606}
+.toque{position:absolute;left:0;top:0;width:40px;height:48px;pointer-events:auto;z-index:4;display:block}
+.paradas{position:absolute;inset:0}
+.toque .chapa{position:absolute;left:50%;top:4px;transform:translate(-50%,0)}
+
+/* carteles y paradas, al costado de la vía ya derecha */
+.rotulos{position:absolute;inset:0;z-index:3;pointer-events:none}
+.rotulo{position:absolute;left:0;display:flex;align-items:center;pointer-events:auto;transform:translateY(-50%);will-change:opacity}
+.rotulo .txt{display:grid;gap:1px;line-height:1.2;padding:4px 6px;min-width:0}
+.rotulo .t{font-size:20px;overflow-wrap:anywhere;background:var(--papel)}
+.rotulo .m{font-family:var(--titulo);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gris)}
+.rotulo:hover .t,.rotulo:active .t{background:color-mix(in srgb,var(--c) 24%,var(--papel))}
+.rotulo.sin .t{color:var(--gris)}
+.cartel{position:absolute;left:0;display:flex;align-items:center;gap:10px;transform:translateY(-50%);pointer-events:none}
+.cartel .chapa{width:38px;height:38px;font-size:21px}
+.cartel h2{font-family:var(--titulo);font-weight:600;font-size:22px;margin:0;line-height:1.05;background:var(--papel);padding-right:6px}
+.cartel p{margin:2px 0 0;font-family:var(--titulo);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gris)}
+.ancla{position:absolute;left:0;width:1px;height:1px}
+
+/* tablero fijo */
+.tablero{position:fixed;top:0;left:0;right:0;z-index:9;padding-top:env(safe-area-inset-top,0px);background:color-mix(in srgb,var(--papel) 92%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--raya);opacity:0;transform:translateY(-100%);transition:opacity .25s,transform .25s}
+.tablero.ver{opacity:1;transform:none}
+.tablero .in{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px;display:flex;align-items:center;gap:12px}
+.tablero .marca{font-family:var(--titulo);font-weight:600;letter-spacing:.14em;font-size:14px;margin-right:auto}
+.tablero nav{display:flex;gap:10px}
+.tablero nav a{opacity:.38;transition:opacity .2s,transform .2s}
+.tablero nav a[aria-current="true"]{opacity:1;transform:scale(1.12)}
+
+footer{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;border-top:1px solid var(--raya);display:flex;gap:20px;font-family:var(--titulo);font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+footer a:hover{background:#ffef5c}
+
+dialog{border:0;padding:0;background:transparent;max-width:min(94vw,900px);max-height:92vh}
+dialog::backdrop{background:rgba(20,19,18,.82)}
+dialog figure{margin:0;display:grid;gap:10px}
+dialog img{max-width:100%;max-height:80vh;width:auto;height:auto;display:block;margin:0 auto;background:var(--papel)}
+dialog figcaption{color:#fbfaf7;font-size:18px;text-align:center}
+dialog button{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px,env(safe-area-inset-right,0px));font:inherit;font-size:28px;line-height:1;width:44px;height:44px;border-radius:50%;border:0;background:var(--papel);color:var(--tinta);cursor:pointer}
+</style>
+
+<div class="tablero" id="tablero">
+  <div class="in">
+    <a class="marca" href="#arriba">PANFLITO</a>
+    <nav id="nav" aria-label="Líneas"></nav>
+  </div>
+</div>
+
+<div class="pagina" id="pagina">
+  <span class="ancla" id="arriba" style="top:0"></span>
+  <header class="inicio">
+    <h1>PANFLITO</h1>
+    <p class="pista" id="pista">Tocá una línea o bajá</p>
+    <div class="mesa" id="mesa"><img src="img/casa.png" fetchpriority="high" alt="Casa del árbol dibujada en marcador sobre una servilleta" width="1400" height="1400"></div>
+  </header>
+  <div class="via" id="via" aria-hidden="true"></div>
+  <nav class="rotulos" id="rotulos" aria-label="Paradas"></nav>
+</div>
+
+<footer id="pie">
+  <a href="https://www.instagram.com/theofernandezn/" target="_blank" rel="noopener">Instagram ↗</a>
+  <a href="https://foundation.app/@theofn" target="_blank" rel="noopener">Foundation ↗</a>
+</footer>
+
+<dialog id="visor" aria-label="Imagen">
+  <button type="button" id="cerrar" aria-label="Cerrar">×</button>
+  <figure><img id="visorImg" alt=""><figcaption id="visorTxt"></figcaption></figure>
+</dialog>
+
+<script>
+(()=>{
+/* ================= ajustes ================= */
+const K=0.5;              // px de pantalla por px de pieza (las piezas están al doble para pantallas retina)
+const VAR={verde:'--d',rojo:'--b',amarillo:'--h',azul:'--a'};
+// de dónde cuelga cada palito sobre la servilleta (fracción del ancho del dibujo) y cómo se tuerce en la portada
+const CUELGA={
+  verde:   {x:.16, y:.915, curva:[5,2,-2,-3,-2,-1]},
+  rojo:    {x:.30, y:.915, curva:[4,2,-2,-3,-1]},
+  amarillo:{x:.64, y:.86,  curva:[14,6,-4,-7,-5,-2]},
+  azul:    {x:.86, y:.42,  curva:[-5,-2,2,4,1]}
+};
+const CODO_CADA=6;        // un codo después de la 2ª parada y después cada 6, como en el palito real
+const quieto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= utilidades ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const chapa=l=>`<span class="chapa${l.color==='amarillo'?' osc':''}" style="--c:var(${VAR[l.color]})">${esc(l.letra)}</span>`;
+const meta=p=>p.detalle||({texto:'Texto',imagen:'Imagen',link:'Link',pronto:'Próximamente'}[p.tipo]||'');
+const R=d=>d*Math.PI/180;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const suave=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+let P,D,lineas=[],geo=null,elegida=0,cambio=null;
+
+/* ================= armado =================
+   Cada línea es su propia cadena de piezas escaneadas, de su color:
+   arranque, una pieza por parada (con codos cada tanto) y la punta final. */
+function armar(){
+  const via=$('via'),rot=$('rotulos'),nav=$('nav');
+  const pieza=(color,tipo)=>{
+    const m=P[color][tipo],img=new Image();
+    img.src=`img/${color}-${tipo}.webp`;img.alt='';img.decoding='async';img.className='pieza';
+    img.width=Math.round(m.w*K);img.height=Math.round(m.h*K);
+    return {el:img,w:m.w*K,h:m.h*K,cin:(m.cxIn??m.cx)*K,cout:(m.cxOut??m.cx)*K,tipo,color};
+  };
+  D.lineas.forEach((l,li)=>{
+    const g=document.createElement('div');g.className='ramal';
+    const ch=[pieza(l.color,'arranque')];let codos=0;
+    l.paradas.forEach((pa,i)=>{
+      const p=pieza(l.color,'parada');p.parada=pa;ch.push(p);
+      if(i<l.paradas.length-1&&(i===1||(i>1&&(i-1)%CODO_CADA===0))){
+        const c=pieza(l.color,'codo');if(codos++%2){c.espejo=true;c.cin=c.w-c.cin;c.cout=c.w-c.cout}ch.push(c);
+      }
+    });
+    ch.push(pieza(l.color,'final'));
+    ch.forEach(p=>g.appendChild(p.el));
+    // chapa para elegir la línea desde la portada
+    const t=document.createElement('a');t.className='toque';t.href='#linea-'+l.id;t.setAttribute('aria-label','Línea '+l.letra+': '+l.nombre);t.innerHTML=chapa(l);
+    t.addEventListener('click',e=>{e.preventDefault();elegir(li,true)});
+    g.appendChild(t);via.appendChild(g);
+
+    // cartel y paradas (solo se muestran los de la línea elegida)
+    const caja=document.createElement('div');caja.className='paradas';caja.hidden=true;
+    const n=l.paradas.length,c=document.createElement('div');c.className='cartel';c.style.setProperty('--c',`var(${VAR[l.color]})`);
+    c.innerHTML=`${chapa(l)}<div><h2>${esc(l.nombre)}</h2><p>${n} ${n===1?'parada':'paradas'}</p></div>`;
+    caja.appendChild(c);
+    const rotulos=[];
+    ch.filter(p=>p.parada).forEach(p=>{
+      const pa=p.parada,ext=pa.tipo==='link';
+      const tag=(pa.tipo==='pronto'||(!pa.url&&!pa.imagen))?'div':'a';
+      const r=document.createElement(tag);r.className='rotulo'+(tag==='div'?' sin':'');r.style.setProperty('--c',`var(${VAR[l.color]})`);
+      r.innerHTML=`<span class="txt"><span class="t">${esc(pa.titulo)}</span><span class="m">${esc(meta(pa))}${ext?' ↗':''}</span></span>`;
+      if(tag==='a'){
+        if(pa.tipo==='imagen'){r.href=pa.imagen;r.dataset.visor='1';r.dataset.t=pa.titulo}
+        else{r.href=pa.url;if(ext){r.target='_blank';r.rel='noopener'}}
+        const on=()=>p.el.classList.add('alzada'),off=()=>p.el.classList.remove('alzada');
+        r.addEventListener('pointerenter',on);r.addEventListener('pointerleave',off);r.addEventListener('focus',on);r.addEventListener('blur',off);
+      }
+      caja.appendChild(r);rotulos.push({r,p});
+    });
+    rot.appendChild(caja);
+    const a=document.createElement('a');a.href='#linea-'+l.id;a.dataset.i=li;a.setAttribute('aria-label',l.nombre);a.innerHTML=chapa(l);
+    a.addEventListener('click',e=>{e.preventDefault();elegir(li,true)});nav.appendChild(a);
+    lineas.push({l,li,g,ch,toque:t,caja,cartel:c,rotulos});
+  });
+}
+
+/* ================= geometría =================
+   Cada pieza se apoya en el final de la anterior. Tres estados se mezclan:
+   - portada: torcida como en la foto (curva)
+   - en vía: derecha y pegada a la izquierda (recta), se endereza de arriba hacia abajo como un tren
+   - afuera: las líneas no elegidas se doblan hacia su costado y se van */
+function medir(){
+  const pag=$('pagina'),mesa=$('mesa');
+  const pr=pag.getBoundingClientRect(),mr=mesa.getBoundingClientRect();
+  const W=mr.width,ox=mr.left-pr.left,oy=mr.top-pr.top;
+  const gut=parseFloat(getComputedStyle(pag).paddingLeft)||16;
+  const desv=(P.verde.codo.cxIn-P.verde.codo.cxOut)*K;
+  geo={W,ox,oy,baseX:gut+desv+P.verde.parada.cx*K+2,viaY:oy+.915*W,rango:Math.max(260,W*0.95),ancho:pag.clientWidth};
+  const orden=lineas.map(o=>CUELGA[o.l.color].x);
+  lineas.forEach(o=>{
+    const c=CUELGA[o.l.color];
+    o.x0=ox+c.x*W;o.y0=oy+c.y*W;o.curva=c.curva;
+    // vía derecha: después de cada codo se inclina apenas hasta volver a su columna
+    let xv=geo.baseX;const tope=R(9);
+    o.ch.forEach(p=>{
+      if(p.tipo!=='parada'){p.recta=0}
+      else{const falta=geo.baseX-xv;p.recta=Math.abs(falta)<1?0:clamp(-Math.atan2(falta,p.h*0.9),-tope,tope)}
+      xv+=(p.cout-p.cin)*Math.cos(p.recta)-p.h*Math.sin(p.recta);
+    });
+    let prev=0;o.ch.forEach(p=>{p.uRecta=p.recta-prev;prev=p.recta});
+    // posiciones de los textos con la línea ya derecha
+    const fin=posar(o,geo.baseX,geo.viaY,1,0);
+    o.rotulos.forEach(q=>{const k=o.ch.indexOf(q.p),f=fin[k];q.y=f.y+q.p.h/2;q.x=f.x-q.p.cin+q.p.w-6;
+      q.r.style.top=q.y+'px';q.r.style.left=q.x+'px';q.r.style.maxWidth=`calc(100% - ${q.x}px)`});
+    o.cartel.style.top=(fin[0].y+o.ch[0].h*0.42)+'px';o.cartel.style.left=(geo.baseX+P.verde.parada.cx*K+44)+'px';
+    const u=o.ch.length-1;o.largo=fin[u].y+o.ch[u].h-geo.viaY;
+  });
+  alto();
+}
+function alto(){
+  const o=lineas[elegida],otro=cambio?lineas[cambio.de]:null;
+  const L=Math.max(o.largo,otro?otro.largo:0);
+  // siempre alcanza para bajar hasta que la línea quede derecha, aunque tenga pocas paradas
+  $('pagina').style.height=Math.max(geo.viaY+L+70,geo.rango+innerHeight+8)+'px';
+}
+
+// a = cuánto está en la vía (0 portada, 1 derecha), b = cuánto se fue para el costado (0 nada, 1 afuera)
+function posar(o,ax,ay,a,b){
+  const out=[];let ang=0;const N=o.curva.length,lado=o.lado||1;
+  o.ch.forEach((p,i)=>{
+    const c=i<N?R(o.curva[i]):0;
+    const w=quieto?(a>0.5?1:0):suave(a*(N+2)-i*0.9);
+    const fuera=b>0?lado*R(7)*suave(b*3-i*0.12)*Math.min(1,i+1):0;   // se curva hacia afuera, primero la punta de arriba
+    ang+=(p.uRecta||0)*a+c*(1-w)+fuera;
+    out.push({x:ax,y:ay,ang});
+    const dx=p.cout-p.cin,dy=p.h,cs=Math.cos(ang),sn=Math.sin(ang);
+    ax+=dx*cs-dy*sn;ay+=dx*sn+dy*cs;
+  });
+  return out;
+}
+function dibujar(o,pos){
+  o.ch.forEach((p,i)=>{const q=pos[i];
+    p.el.style.transform=`translate(${q.x}px,${q.y}px) rotate(${q.ang}rad) translate(${-p.cin}px,0)`+(p.espejo?` translate(${p.w}px,0) scale(-1,1)`:'');
+  });
+}
+
+function cuadro(){
+  if(!geo)return;
+  const t=quieto?(scrollY>8?1:0):clamp(scrollY/geo.rango,0,1);
+  const u=cambio?suave((performance.now()-cambio.t0)/650):1;
+  const xe=lineas[elegida].x0;
+  lineas.forEach((o,i)=>{
+    // hacia qué costado se va: las que están a la izquierda de la elegida, a la izquierda
+    o.lado=o.x0<xe?1:-1;
+    let a,b;
+    if(i===elegida){a=cambio?t*u:t;b=cambio?t*(1-u):0}
+    else if(cambio&&i===cambio.de){o.lado=o.x0<=xe?1:-1;a=t*(1-u);b=Math.max(t*u,u*0.9)}
+    else{a=0;b=t}
+    const ax=lerp(o.x0,geo.baseX,suave(a*1.15)),ay=lerp(o.y0,geo.viaY,suave(a*1.15));
+    const pos=posar(o,ax,ay,a,b);dibujar(o,pos);
+    const op=1-suave((b-0.25)/0.55);
+    o.g.style.opacity=op;o.g.style.visibility=op<0.02?'hidden':'visible';
+    // chapa al pie de la parte que se ve en la portada
+    // chapa en el comienzo de la rama, arriba, donde cuelga
+    const q=pos[0];
+    o.toque.style.transform=`translate(${q.x-20}px,${q.y-34}px)`;
+    o.toque.style.opacity=1-suave(t/0.5);o.toque.style.visibility=t>0.6?'hidden':'visible';
+  });
+  // textos de la línea elegida: aparecen cuando ya está derecha
+  const op=suave((t-0.7)/0.3)*(cambio?suave((u-0.5)/0.5):1);
+  lineas.forEach((o,i)=>{const ver=i===elegida;o.caja.hidden=!ver;if(ver)o.caja.style.opacity=op;o.caja.style.visibility=op<0.02?'hidden':'visible'});
+  $('pista').style.opacity=1-suave(t/0.3);
+  $('tablero').classList.toggle('ver',t>0.85);
+  if(cambio&&u>=1){cambio=null;alto()}
+  if(cambio)requestAnimationFrame(cuadro);
+}
+
+function elegir(i,bajar){
+  if(i!==elegida){
+    cambio={de:elegida,t0:performance.now()};elegida=i;
+    try{history.replaceState(null,'','#linea-'+lineas[i].l.id)}catch(e){}
+    alto();
+  }
+  $('nav').querySelectorAll('a').forEach(a=>a.setAttribute('aria-current',+a.dataset.i===elegida));
+  if(bajar&&scrollY<geo.rango){scrollTo({top:geo.rango+4,behavior:quieto?'auto':'smooth'})}
+  else if(bajar&&scrollY>geo.rango+40){scrollTo({top:geo.rango+4,behavior:quieto?'auto':'smooth'})}
+  requestAnimationFrame(cuadro);
+}
+
+let pedido=false;
+const alScroll=()=>{if(pedido)return;pedido=true;requestAnimationFrame(()=>{pedido=false;cuadro()})};
+
+/* ================= arranque ================= */
+Promise.all([fetch('piezas.json').then(r=>r.json()),fetch('paradas.json').then(r=>r.json())]).then(([p,d])=>{
+  P=p;D=d;armar();
+  const h=location.hash.replace('#linea-','');const ini=lineas.findIndex(o=>o.l.id===h);
+  if(ini>=0)elegida=ini;
+  $('nav').querySelectorAll('a').forEach(a=>a.setAttribute('aria-current',+a.dataset.i===elegida));
+  const listo=()=>{medir();cuadro()};
+  const img=$('mesa').querySelector('img');
+  if(!img.complete)img.addEventListener('load',listo);
+  listo();
+  if(ini>=0)setTimeout(()=>scrollTo(0,geo.rango+4),60);
+  addEventListener('scroll',alScroll,{passive:true});
+  addEventListener('resize',listo);
+  if(document.fonts)document.fonts.ready.then(listo);
+}).catch(()=>{$('rotulos').innerHTML='<p style="position:absolute;top:110%;color:var(--gris)">No se pudieron cargar las paradas. Recargá la página.</p>'});
+
+$('arriba').closest('.pagina');
+document.querySelector('.tablero .marca').addEventListener('click',e=>{e.preventDefault();scrollTo({top:0,behavior:quieto?'auto':'smooth'})});
+
+// visor de imágenes
+const visor=$('visor');
+document.addEventListener('click',e=>{const a=e.target.closest('a[data-visor]');if(!a)return;e.preventDefault();
+  $('visorImg').src=a.getAttribute('href');$('visorImg').alt=a.dataset.t;$('visorTxt').textContent=a.dataset.t;visor.showModal()});
+$('cerrar').onclick=()=>visor.close();
+visor.addEventListener('click',e=>{if(e.target===visor)visor.close()});
+})();
+</script>
