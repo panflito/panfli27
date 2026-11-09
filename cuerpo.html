@@ -3,6 +3,8 @@
 <link rel="preload" href="img/casa.png" as="image" fetchpriority="high">
 <link rel="preload" href="paradas.json" as="fetch" crossorigin>
 <link rel="preload" href="piezas.json" as="fetch" crossorigin>
+<link rel="preload" href="img/verde-parada.webp" as="image">
+<link rel="preload" href="img/verde-arranque.webp" as="image">
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
@@ -30,7 +32,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--tinta);outline-offs
 
 /* la vía: piezas escaneadas encadenadas */
 .via{position:absolute;inset:0;z-index:2;pointer-events:none}
-#lienzo{position:fixed;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;filter:drop-shadow(1px 2px 1.5px rgba(0,0,0,.18))}
+.pieza{position:absolute;top:0;left:0;display:block;transform-origin:0 0;will-change:transform;filter:drop-shadow(1px 2px 1.5px rgba(0,0,0,.18));transition:filter .18s}
+.pieza.alzada{filter:drop-shadow(4px 8px 6px rgba(0,0,0,.3))}
 .ramal{position:absolute;inset:0;pointer-events:none;will-change:opacity}
 .ramal a{pointer-events:auto}
 
@@ -77,7 +80,6 @@ dialog button{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right
   </div>
 </div>
 
-<canvas id="lienzo" aria-hidden="true"></canvas>
 <div class="pagina" id="pagina">
   <span class="ancla" id="arriba" style="top:0"></span>
   <header class="inicio">
@@ -98,7 +100,7 @@ dialog button{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right
 <script>
 (()=>{
 /* ================= ajustes ================= */
-const K=1/3;              // px de pantalla por px de pieza (las piezas están al triple, nítidas en cualquier pantalla)
+const K=0.5;              // px de pantalla por px de pieza (las piezas están al doble para pantallas retina)
 const VAR={verde:'--d',rojo:'--b',amarillo:'--h',azul:'--a'};
 // de dónde cuelga cada palito sobre la servilleta (fracción del ancho del dibujo) y cómo se tuerce en la portada
 const CUELGA={
@@ -129,11 +131,11 @@ let P,D,lineas=[],geo=null,elegida=0,cambio=null;
    arranque, una pieza por parada (con codos cada tanto) y la punta final. */
 function armar(){
   const via=$('via'),rot=$('rotulos'),nav=$('nav');
-  const imgs={};
   const pieza=(color,tipo)=>{
-    const m=P[color][tipo],k=color+'-'+tipo;
-    if(!imgs[k]){const im=new Image();im.decoding='async';im.onload=pedir;im.src=`img/${k}.webp`;imgs[k]=im}
-    return {img:imgs[k],w:m.w*K,h:m.h*K,cin:(m.cxIn??m.cx)*K,cout:(m.cxOut??m.cx)*K,tipo,color};
+    const m=P[color][tipo],img=new Image();
+    img.src=`img/${color}-${tipo}.webp`;img.alt='';img.decoding='async';img.className='pieza';
+    img.width=Math.round(m.w*K);img.height=Math.round(m.h*K);
+    return {el:img,w:m.w*K,h:m.h*K,cin:(m.cxIn??m.cx)*K,cout:(m.cxOut??m.cx)*K,tipo,color};
   };
   D.lineas.forEach((l,li)=>{
     const g=document.createElement('div');g.className='ramal';
@@ -145,6 +147,7 @@ function armar(){
       }
     });
     ch.push(pieza(l.color,'final'));
+    ch.forEach(p=>g.appendChild(p.el));
     // chapa para elegir la línea desde la portada
     const t=document.createElement('a');t.className='toque';t.href='#linea-'+l.id;t.setAttribute('aria-label','Línea '+l.letra+': '+l.nombre);t.innerHTML=chapa(l);
     t.addEventListener('click',e=>{e.preventDefault();elegir(li,true,'portada')});
@@ -162,7 +165,7 @@ function armar(){
       if(tag==='a'){
         if(pa.tipo==='imagen'){r.href=pa.imagen;r.dataset.visor='1';r.dataset.t=pa.titulo}
         else{r.href=pa.url;if(ext){r.target='_blank';r.rel='noopener'}}
-        const on=()=>{p.alzada=true;pedir()},off=()=>{p.alzada=false;pedir()};
+        const on=()=>p.el.classList.add('alzada'),off=()=>p.el.classList.remove('alzada');
         r.addEventListener('pointerenter',on);r.addEventListener('pointerleave',off);r.addEventListener('focus',on);r.addEventListener('blur',off);
       }
       if(tag==='a')r.addEventListener('click',()=>contar('abrir_parada',{linea:l.nombre,parada:pa.titulo,tipo:pa.tipo}));
@@ -229,64 +232,9 @@ function posar(o,ax,ay,a,b){
   });
   return out;
 }
-/* ================= dibujo =================
-   Cada rama se pinta en franjas de 2 px a lo largo de una curva suave: los quiebres entre piezas
-   se reparten en unos 20 px, así la rama se dobla como un solo cuerpo y no se ven costuras.
-   Se dibuja solo lo que entra en pantalla. */
-const lienzo=document.getElementById('lienzo'),ctx=lienzo.getContext('2d');
-let dpr=1,off=null,offc=null;
-function tamLienzo(){dpr=Math.min(3,window.devicePixelRatio||1);lienzo.width=Math.round(innerWidth*dpr);lienzo.height=Math.round(innerHeight*dpr);off=null}
-function capa(){if(!off){off=document.createElement('canvas');off.width=lienzo.width;off.height=lienzo.height;offc=off.getContext('2d')}return offc}
-const FR=3,RADIO=10;
-function trazar(c,o,ox,oy){
-  const ch=o.ch,pos=o.pos,n=ch.length;if(!pos)return;
-  const S=[0],Fi=[0];
-  ch.forEach((p,i)=>{S.push(S[i]+p.h);Fi.push(Fi[i]+pos[i].ang*p.h)});
-  const L=S[n];
-  const F=s=>{
-    if(s<=0)return pos[0].ang*s;
-    if(s>=L)return Fi[n]+pos[n-1].ang*(s-L);
-    let lo=0,hi=n-1;while(lo<hi){const m=(lo+hi+1)>>1;if(S[m]<=s)lo=m;else hi=m-1}
-    return Fi[lo]+pos[lo].ang*(s-S[lo]);
-  };
-  const giro=s=>(F(s+RADIO)-F(s-RADIO))/(2*RADIO);
-  const arriba=-280,abajo=innerHeight+280;
-  // pone una franja de la pieza (desde ly, alto hs) con su giro, en (x,y)
-  const franja=(p,x,y,t,ly,hs)=>{
-    const im=p.img;if(!(im.complete&&im.naturalWidth))return;
-    const sy=oy+y;if(sy<arriba||sy>abajo)return;
-    const cs=Math.cos(t),sn=Math.sin(t);
-    c.setTransform(dpr*cs,dpr*sn,-dpr*sn,dpr*cs,dpr*(ox+x+(p.alzada?3:0)),dpr*sy);
-    let dx=-p.cin;if(p.espejo){c.transform(-1,0,0,1,0,0);dx=p.cin-p.w}
-    const srcY=ly/K,srcH=Math.min(hs/K,im.naturalHeight-srcY);
-    if(srcH>0.5)c.drawImage(im,0,srcY,im.naturalWidth,srcH,dx,0,p.w,srcH*K);
-  };
-  let x=pos[0].x,y=pos[0].y,t=pos[0].ang;const fundidos=[];
-  for(let i=0;i<n;i++){
-    const p=ch[i],t0=giro(S[i]+1),t1=giro(S[i]+p.h-1),tm=giro(S[i]+p.h/2);
-    if(Math.abs(t0-t1)<1e-4&&Math.abs(t0-tm)<1e-4){
-      // tramo derecho: la pieza entera de una vez
-      t=t0;franja(p,x,y,t,0,p.h+0.9);x-=Math.sin(t)*p.h;y+=Math.cos(t)*p.h;
-    }else{
-      for(let ly=0;ly<p.h;ly+=FR){
-        const hs=Math.min(FR,p.h-ly);t=giro(S[i]+ly+hs/2);
-        franja(p,x,y,t,ly,hs+0.9);x-=Math.sin(t)*hs;y+=Math.cos(t)*hs;
-      }
-    }
-    fundidos.push([p,x,y,t]);
-    const d=p.cout-p.cin;x+=d*Math.cos(t);y+=d*Math.sin(t);
-  }
-  // segunda pasada: el borde que se desvanece de cada pieza, encima del comienzo de la siguiente
-  fundidos.forEach(([p,fx,fy,ft])=>{const extra=p.img.naturalHeight*K-p.h;if(extra>0.5)franja(p,fx,fy,ft,p.h,extra)});
-}
-function pintar(){
-  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,lienzo.width,lienzo.height);
-  const r=$('pagina').getBoundingClientRect();
-  lineas.forEach(o=>{
-    if(!(o.op>0.02))return;
-    if(o.op>=0.99){trazar(ctx,o,r.left,r.top);return}
-    const c=capa();c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,off.width,off.height);trazar(c,o,r.left,r.top);
-    ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=o.op;ctx.drawImage(off,0,0);ctx.globalAlpha=1;
+function dibujar(o,pos){
+  o.ch.forEach((p,i)=>{const q=pos[i];
+    p.el.style.transform=`translate(${q.x}px,${q.y}px) rotate(${q.ang}rad) translate(${-p.cin}px,0)`+(p.espejo?` translate(${p.w}px,0) scale(-1,1)`:'');
   });
 }
 
@@ -304,9 +252,9 @@ function cuadro(){
     else if(cambio&&i===cambio.de){o.lado=o.x0<=xe?1:-1;a=t*(1-u);b=Math.max(t*u,u*0.9)}
     else{a=0;b=t}
     const ax=lerp(o.x0,geo.baseX,suave(a*1.15)),ay=lerp(o.y0,geo.viaY,suave(a*1.15));
-    const pos=posar(o,ax,ay,a,b);o.pos=pos;
+    const pos=posar(o,ax,ay,a,b);dibujar(o,pos);
     const op=1-suave((b-0.25)/0.55);
-    o.op=op;o.g.style.opacity=op;o.g.style.visibility=op<0.02?'hidden':'visible';
+    o.g.style.opacity=op;o.g.style.visibility=op<0.02?'hidden':'visible';
     // la chapa es la tapa de la punta del palito: va siempre ahí, siga la rama donde siga
     const q=pos[0],r0=11.5;
     o.toque.style.transform=`translate(${q.x-22-Math.sin(q.ang)*r0}px,${q.y-22+Math.cos(q.ang)*r0}px)`;
@@ -317,7 +265,6 @@ function cuadro(){
   lineas.forEach((o,i)=>{const ver=i===elegida;o.caja.hidden=!ver;if(ver)o.caja.style.opacity=op;o.caja.style.visibility=op<0.02?'hidden':'visible'});
   $('tablero').classList.toggle('ver',t>0.85);
   if(t>=1&&!cuadro.bajo){cuadro.bajo=true;contar('bajar_por_linea',{linea:lineas[elegida].l.nombre})}
-  pintar();
   if(cambio&&u>=1){cambio=null;alto()}
   if(cambio)requestAnimationFrame(cuadro);
   else if(meneo(t))requestAnimationFrame(cuadro);
@@ -345,11 +292,10 @@ function elegir(i,bajar,desde){
 
 let pedido=false;
 const alScroll=()=>{if(pedido)return;pedido=true;requestAnimationFrame(()=>{pedido=false;cuadro()})};
-function pedir(){alScroll()}
 
 /* ================= arranque ================= */
 Promise.all([fetch('piezas.json').then(r=>r.json()),fetch('paradas.json').then(r=>r.json())]).then(([p,d])=>{
-  P=p;D=d;tamLienzo();armar();
+  P=p;D=d;armar();
   const h=location.hash.replace('#linea-','');const ini=lineas.findIndex(o=>o.l.id===h);
   if(ini>=0){elegida=ini;contar('elegir_linea',{linea:lineas[ini].l.nombre,desde:'link directo'})}
   $('nav').querySelectorAll('a').forEach(a=>a.setAttribute('aria-current',+a.dataset.i===elegida));
@@ -359,7 +305,7 @@ Promise.all([fetch('piezas.json').then(r=>r.json()),fetch('paradas.json').then(r
   listo();
   if(ini>=0)setTimeout(()=>scrollTo(0,geo.rango+4),60);
   addEventListener('scroll',alScroll,{passive:true});
-  addEventListener('resize',()=>{tamLienzo();listo()});
+  addEventListener('resize',listo);
   if(document.fonts)document.fonts.ready.then(listo);
 }).catch(()=>{$('rotulos').innerHTML='<p style="position:absolute;top:110%;color:var(--gris)">No se pudieron cargar las paradas. Recargá la página.</p>'});
 
