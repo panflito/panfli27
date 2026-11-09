@@ -8,15 +8,13 @@
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
 <style>
 /* layout: una sola vía de palitos escaneados que cuelga de la casa y baja por toda la página; cambia de línea en cada codo */
 :root{
   --papel:#fbfaf7; --tinta:#141312; --gris:#7a766e; --raya:#e4e1da;
   --d:#2D7539; --b:#C32D27; --h:#C3932D; --a:#4581BD;
   --titulo:"Gill Sans","Gill Sans MT","Gill Sans Nova",Lato,"Trebuchet MS",sans-serif;
-  --texto:"EB Garamond","Times New Roman",Times,serif;
+  --texto:"Times New Roman",Times,serif;   /* la de la página vieja */
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -27,8 +25,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--tinta);outline-offs
 
 .pagina{position:relative;overflow:clip;max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 0}
 .inicio{display:grid;justify-items:center;position:relative;z-index:1}
-.inicio h1{font-family:var(--titulo);font-weight:600;font-size:clamp(30px,9vw,46px);letter-spacing:.14em;margin:0;padding-left:.14em;line-height:1.1}
-.pista{font-family:var(--titulo);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);margin:6px 0 4px;transition:opacity .3s}
+.inicio h1{font-family:var(--titulo);font-weight:600;font-size:clamp(30px,9vw,46px);letter-spacing:.14em;margin:0 0 6px;padding-left:.14em;line-height:1.1}
 .mesa{width:100%;max-width:520px}
 .mesa img{display:block;width:100%;height:auto}
 
@@ -42,22 +39,18 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--tinta);outline-offs
 /* chapas de línea */
 .chapa{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;font-family:var(--titulo);font-weight:700;font-size:17px;line-height:1;box-shadow:0 0 0 2px var(--papel);flex:none}
 .chapa.osc{color:#1d1606}
-.toque{position:absolute;left:0;top:0;width:40px;height:48px;pointer-events:auto;z-index:4;display:block}
+.toque{position:absolute;left:0;top:0;width:44px;height:44px;pointer-events:auto;z-index:4;display:grid;place-items:center;transition:opacity .2s}
+.toque .chapa{width:27px;height:27px;font-size:15px;box-shadow:0 1px 2px rgba(0,0,0,.25)}
 .paradas{position:absolute;inset:0}
-.toque .chapa{position:absolute;left:50%;top:4px;transform:translate(-50%,0)}
 
-/* carteles y paradas, al costado de la vía ya derecha */
+/* paradas, al costado de la vía ya derecha */
 .rotulos{position:absolute;inset:0;z-index:3;pointer-events:none}
 .rotulo{position:absolute;left:0;display:flex;align-items:center;pointer-events:auto;transform:translateY(-50%);will-change:opacity}
 .rotulo .txt{display:grid;gap:1px;line-height:1.2;padding:4px 6px;min-width:0}
-.rotulo .t{font-size:20px;overflow-wrap:anywhere;background:var(--papel)}
+.rotulo .t{font-size:21px;overflow-wrap:anywhere;background:var(--papel)}
 .rotulo .m{font-family:var(--titulo);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gris)}
-.rotulo:hover .t,.rotulo:active .t{background:color-mix(in srgb,var(--c) 24%,var(--papel))}
+.rotulo:hover .t,.rotulo:active .t,.rotulo:focus-visible .t{background:#fff23a}
 .rotulo.sin .t{color:var(--gris)}
-.cartel{position:absolute;left:0;display:flex;align-items:center;gap:10px;transform:translateY(-50%);pointer-events:none}
-.cartel .chapa{width:38px;height:38px;font-size:21px}
-.cartel h2{font-family:var(--titulo);font-weight:600;font-size:22px;margin:0;line-height:1.05;background:var(--papel);padding-right:6px}
-.cartel p{margin:2px 0 0;font-family:var(--titulo);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gris)}
 .ancla{position:absolute;left:0;width:1px;height:1px}
 
 /* tablero fijo */
@@ -91,7 +84,6 @@ dialog button{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right
   <span class="ancla" id="arriba" style="top:0"></span>
   <header class="inicio">
     <h1>PANFLITO</h1>
-    <p class="pista" id="pista">Tocá una línea o bajá</p>
     <div class="mesa" id="mesa"><img src="img/casa.png" fetchpriority="high" alt="Casa del árbol dibujada en marcador sobre una servilleta" width="1400" height="1400"></div>
   </header>
   <div class="via" id="via" aria-hidden="true"></div>
@@ -166,15 +158,12 @@ function armar(){
 
     // cartel y paradas (solo se muestran los de la línea elegida)
     const caja=document.createElement('div');caja.className='paradas';caja.hidden=true;
-    const n=l.paradas.length,c=document.createElement('div');c.className='cartel';c.style.setProperty('--c',`var(${VAR[l.color]})`);
-    c.innerHTML=`${chapa(l)}<div><h2>${esc(l.nombre)}</h2><p>${n} ${n===1?'parada':'paradas'}</p></div>`;
-    caja.appendChild(c);
     const rotulos=[];
     ch.filter(p=>p.parada).forEach(p=>{
       const pa=p.parada,ext=pa.tipo==='link';
       const tag=(pa.tipo==='pronto'||(!pa.url&&!pa.imagen))?'div':'a';
       const r=document.createElement(tag);r.className='rotulo'+(tag==='div'?' sin':'');r.style.setProperty('--c',`var(${VAR[l.color]})`);
-      r.innerHTML=`<span class="txt"><span class="t">${esc(pa.titulo)}</span><span class="m">${esc(meta(pa))}${ext?' ↗':''}</span></span>`;
+      r.innerHTML=`<span class="txt"><span class="t">${esc(pa.titulo)}</span></span>`;
       if(tag==='a'){
         if(pa.tipo==='imagen'){r.href=pa.imagen;r.dataset.visor='1';r.dataset.t=pa.titulo}
         else{r.href=pa.url;if(ext){r.target='_blank';r.rel='noopener'}}
@@ -187,7 +176,7 @@ function armar(){
     rot.appendChild(caja);
     const a=document.createElement('a');a.href='#linea-'+l.id;a.dataset.i=li;a.setAttribute('aria-label',l.nombre);a.innerHTML=chapa(l);
     a.addEventListener('click',e=>{e.preventDefault();elegir(li,true,'tablero')});nav.appendChild(a);
-    lineas.push({l,li,g,ch,toque:t,caja,cartel:c,rotulos});
+    lineas.push({l,li,g,ch,toque:t,caja,rotulos,fase:li*1.7});
   });
 }
 
@@ -219,7 +208,6 @@ function medir(){
     const fin=posar(o,geo.baseX,geo.viaY,1,0);
     o.rotulos.forEach(q=>{const k=o.ch.indexOf(q.p),f=fin[k];q.y=f.y+q.p.h/2;q.x=f.x-q.p.cin+q.p.w-6;
       q.r.style.top=q.y+'px';q.r.style.left=q.x+'px';q.r.style.maxWidth=`calc(100% - ${q.x}px)`});
-    o.cartel.style.top=(fin[0].y+o.ch[0].h*0.42)+'px';o.cartel.style.left=(geo.baseX+P.verde.parada.cx*K+44)+'px';
     const u=o.ch.length-1;o.largo=fin[u].y+o.ch[u].h-geo.viaY;
   });
   alto();
@@ -228,14 +216,15 @@ function alto(){
   const o=lineas[elegida],otro=cambio?lineas[cambio.de]:null;
   const L=Math.max(o.largo,otro?otro.largo:0);
   // siempre alcanza para bajar hasta que la línea quede derecha, aunque tenga pocas paradas
-  $('pagina').style.height=Math.max(geo.viaY+L+70,geo.rango+innerHeight+8)+'px';
+  const pie=$('pie').offsetHeight||0;
+  $('pagina').style.height=Math.max(geo.viaY+L+70,geo.rango+innerHeight+4-pie)+'px';
 }
 
 // a = cuánto está en la vía (0 portada, 1 derecha), b = cuánto se fue para el costado (0 nada, 1 afuera)
 function posar(o,ax,ay,a,b){
   const out=[];let ang=0;const N=o.curva.length,lado=o.lado||1;
   o.ch.forEach((p,i)=>{
-    const c=i<N?R(o.curva[i]):0;
+    const c=(i<N?R(o.curva[i]):0)+(i===0?(o.balanceo||0):0);
     const w=quieto?(a>0.5?1:0):suave(a*(N+2)-i*0.9);
     const fuera=b>0?lado*R(7)*suave(b*3-i*0.12)*Math.min(1,i+1):0;   // se curva hacia afuera, primero la punta de arriba
     ang+=(p.uRecta||0)*a+c*(1-w)+fuera;
@@ -256,6 +245,7 @@ function cuadro(){
   const t=quieto?(scrollY>8?1:0):clamp(scrollY/geo.rango,0,1);
   const u=cambio?suave((performance.now()-cambio.t0)/650):1;
   const xe=lineas[elegida].x0;
+  meneo(t);
   lineas.forEach((o,i)=>{
     // hacia qué costado se va: las que están a la izquierda de la elegida, a la izquierda
     o.lado=o.x0<xe?1:-1;
@@ -267,20 +257,26 @@ function cuadro(){
     const pos=posar(o,ax,ay,a,b);dibujar(o,pos);
     const op=1-suave((b-0.25)/0.55);
     o.g.style.opacity=op;o.g.style.visibility=op<0.02?'hidden':'visible';
-    // chapa al pie de la parte que se ve en la portada
-    // chapa en el comienzo de la rama, arriba, donde cuelga
-    const q=pos[0];
-    o.toque.style.transform=`translate(${q.x-20}px,${q.y-34}px)`;
-    o.toque.style.opacity=1-suave(t/0.5);o.toque.style.visibility=t>0.6?'hidden':'visible';
+    // la chapa es la tapa de la punta del palito: va siempre ahí, siga la rama donde siga
+    const q=pos[0],r0=11.5;
+    o.toque.style.transform=`translate(${q.x-22-Math.sin(q.ang)*r0}px,${q.y-22+Math.cos(q.ang)*r0}px)`;
+    o.toque.style.opacity=op;o.toque.style.visibility=op<0.02?'hidden':'visible';
   });
   // textos de la línea elegida: aparecen cuando ya está derecha
   const op=suave((t-0.7)/0.3)*(cambio?suave((u-0.5)/0.5):1);
   lineas.forEach((o,i)=>{const ver=i===elegida;o.caja.hidden=!ver;if(ver)o.caja.style.opacity=op;o.caja.style.visibility=op<0.02?'hidden':'visible'});
-  $('pista').style.opacity=1-suave(t/0.3);
   $('tablero').classList.toggle('ver',t>0.85);
   if(t>=1&&!cuadro.bajo){cuadro.bajo=true;contar('bajar_por_linea',{linea:lineas[elegida].l.nombre})}
   if(cambio&&u>=1){cambio=null;alto()}
   if(cambio)requestAnimationFrame(cuadro);
+  else if(meneo(t))requestAnimationFrame(cuadro);
+}
+// en la portada las ramas se mecen apenas, colgadas de la casa: así se nota que están sueltas y se pueden tocar
+function meneo(t){
+  if(quieto||document.hidden)return false;
+  const f=1-suave(t/0.25),ahora=performance.now()/1000;
+  lineas.forEach(o=>{o.balanceo=f*R(2.4)*Math.sin(ahora*1.25+o.fase)});
+  return f>0;
 }
 
 function elegir(i,bajar,desde){
