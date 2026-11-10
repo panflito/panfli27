@@ -1,8 +1,197 @@
-{"v":1,"proyectos":{
-"tangram":{"disp":"lado","redondo":true,"fotos":[{"f":"tangram-1.jpg","c":[0,0,0,0]},{"f":"tangram-2.jpg","c":[0,0,0,0]},{"f":"tangram-3.jpg","c":[0,0,0,0]}]},
-"alcancias":{"disp":"fila","redondo":true,"fotos":[{"f":"alcancias-1.jpg","c":[0,0,0,0]},{"f":"alcancias-2.jpg","c":[0,0,0,0]},{"f":"alcancias-3.jpg","c":[0,0,0,0]}]},
-"vasijas":{"disp":"dos-una","redondo":true,"fotos":[{"f":"vasijas-1.jpg","c":[0,0,0,0]},{"f":"vasijas-2.jpg","c":[0,0,0,0]},{"f":"vasijas-3.jpg","c":[0,0,0,0]}]},
-"titeres":{"disp":"fila","redondo":false,"fotos":[{"f":"titeres-1.jpg","c":[0,0,0,0]},{"f":"titeres-2.jpg","c":[0,0,0,0]}]},
-"laberintos":{"disp":"lado","redondo":true,"fotos":[{"f":"laberintos-3.jpg","c":[0,0,0,0]},{"f":"laberintos-1.jpg","c":[0,0,0,0]},{"f":"laberintos-2.jpg","c":[0,0,0,0]}]},
-"tote-bags":{"disp":"fila","redondo":true,"fotos":[{"f":"tote-bags-2.jpg","c":[0,0,0,0.25]},{"f":"tote-bags-3.jpg","c":[0,0,0,0]},{"f":"tote-bags-1.jpg","c":[0,0,0,0],"usar":false}]}
-}}
+{
+ "v": 1,
+ "proyectos": {
+  "tangram": {
+   "disp": "lado",
+   "redondo": true,
+   "fotos": [
+    {
+     "f": "tangram-1.jpg",
+     "c": [
+      0,
+      0,
+      0,
+      0.31
+     ]
+    },
+    {
+     "f": "tangram-2.jpg",
+     "c": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "f": "tangram-3.jpg",
+     "c": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "alcancias": {
+   "disp": "fila",
+   "redondo": true,
+   "fotos": [
+    {
+     "f": "alcancias-1.jpg",
+     "c": [
+      0.04,
+      0.105,
+      0.06,
+      0.095
+     ]
+    },
+    {
+     "f": "alcancias-2.jpg",
+     "c": [
+      0.06,
+      0.125,
+      0.05,
+      0.02
+     ]
+    },
+    {
+     "f": "alcancias-3.jpg",
+     "c": [
+      0.035,
+      0.12,
+      0.02,
+      0.115
+     ]
+    }
+   ]
+  },
+  "vasijas": {
+   "disp": "dos-una",
+   "redondo": true,
+   "fotos": [
+    {
+     "f": "vasijas-1.jpg",
+     "c": [
+      0,
+      0.14,
+      0,
+      0
+     ]
+    },
+    {
+     "f": "vasijas-2.jpg",
+     "c": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "f": "vasijas-3.jpg",
+     "c": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "titeres": {
+   "disp": "fila",
+   "redondo": true,
+   "fotos": [
+    {
+     "f": "titeres-1.jpg",
+     "c": [
+      0.015,
+      0.035,
+      0.025,
+      0.025
+     ],
+     "margen": 0.05
+    },
+    {
+     "f": "titeres-2.jpg",
+     "c": [
+      0,
+      0.01,
+      0,
+      0.015
+     ],
+     "margen": 0.05
+    }
+   ]
+  },
+  "laberintos": {
+   "disp": "lado",
+   "redondo": true,
+   "fotos": [
+    {
+     "f": "laberintos-3.jpg",
+     "c": [
+      0.005,
+      0.225,
+      0.095,
+      0.165
+     ]
+    },
+    {
+     "f": "laberintos-1.jpg",
+     "c": [
+      0,
+      0.22,
+      0.015,
+      0.12
+     ]
+    },
+    {
+     "f": "laberintos-2.jpg",
+     "c": [
+      0,
+      0.19,
+      0,
+      0.115
+     ]
+    }
+   ]
+  },
+  "tote-bags": {
+   "disp": "fila",
+   "redondo": true,
+   "fotos": [
+    {
+     "f": "tote-bags-2.jpg",
+     "c": [
+      0,
+      0,
+      0,
+      0.25
+     ]
+    },
+    {
+     "f": "tote-bags-3.jpg",
+     "c": [
+      0,
+      0.115,
+      0,
+      0.02
+     ]
+    },
+    {
+     "f": "tote-bags-1.jpg",
+     "c": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "usar": false
+    }
+   ]
+  }
+ }
+}
