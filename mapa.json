@@ -82,9 +82,10 @@
    "url": "https://www.youtube.com/@ElAhijado4",
    "destino": "mi canal",
    "embed": {
-    "src": "https://www.youtube-nocookie.com/embed/lta22JNHBfY",
+    "src": "https://www.youtube-nocookie.com/embed/videoseries?list=UULFjGmsAoQ7a-dFhW6pSi91lQ",
     "video": true,
-    "titulo": "Último Piso, video"
+    "titulo": "Último video del canal",
+    "respaldo": "https://www.youtube-nocookie.com/embed/5Gr2hKKzH6k"
    }
   },
   {
