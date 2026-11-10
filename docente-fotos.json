@@ -1,0 +1,8 @@
+{"v":1,"proyectos":{
+"tangram":{"disp":"lado","redondo":true,"fotos":[{"f":"tangram-1.jpg","c":[0,0,0,0]},{"f":"tangram-2.jpg","c":[0,0,0,0]},{"f":"tangram-3.jpg","c":[0,0,0,0]}]},
+"alcancias":{"disp":"fila","redondo":true,"fotos":[{"f":"alcancias-1.jpg","c":[0,0,0,0]},{"f":"alcancias-2.jpg","c":[0,0,0,0]},{"f":"alcancias-3.jpg","c":[0,0,0,0]}]},
+"vasijas":{"disp":"dos-una","redondo":true,"fotos":[{"f":"vasijas-1.jpg","c":[0,0,0,0]},{"f":"vasijas-2.jpg","c":[0,0,0,0]},{"f":"vasijas-3.jpg","c":[0,0,0,0]}]},
+"titeres":{"disp":"fila","redondo":false,"fotos":[{"f":"titeres-1.jpg","c":[0,0,0,0]},{"f":"titeres-2.jpg","c":[0,0,0,0]}]},
+"laberintos":{"disp":"lado","redondo":true,"fotos":[{"f":"laberintos-3.jpg","c":[0,0,0,0]},{"f":"laberintos-1.jpg","c":[0,0,0,0]},{"f":"laberintos-2.jpg","c":[0,0,0,0]}]},
+"tote-bags":{"disp":"fila","redondo":true,"fotos":[{"f":"tote-bags-2.jpg","c":[0,0,0,0.25]},{"f":"tote-bags-3.jpg","c":[0,0,0,0]},{"f":"tote-bags-1.jpg","c":[0,0,0,0],"usar":false}]}
+}}
