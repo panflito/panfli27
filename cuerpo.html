@@ -122,6 +122,9 @@ button:focus-visible{outline:none}
 .tira{display:flex;gap:12px;box-sizing:content-box;align-items:center}
 .tira video{flex:none;display:block;height:270px;width:auto;border-radius:10px;scroll-snap-align:center;opacity:.4;transition:opacity .2s;background:#eceae5}
 .tira video.aqui{opacity:1}
+/* pista de por dónde va la cinta: la misma calle gris del carrusel, con un tramo de color que avanza */
+.avance{position:relative;height:5px;margin:14px auto 0;width:min(60%,220px);border-radius:3px;background:#d6d5d2}
+.avance i{position:absolute;top:0;bottom:0;left:0;border-radius:3px;background:var(--c)}
 /* dibujos en tinta sobre blanco: se funden con el papel de la página */
 .fotos.tinta .ff{gap:14px}
 .fotos.tinta img{mix-blend-mode:multiply}
@@ -321,6 +324,9 @@ function cinta(c){
     const v=vs[j];if(!v.src)v.src=v.dataset.v;const p=v.play();p&&p.catch(()=>{v.controls=true})};
   c.addEventListener('scroll',()=>{const j=centro();vs.forEach((v,k)=>v.classList.toggle('aqui',k===j));clearTimeout(tm);tm=setTimeout(()=>pon(centro()),120)},{passive:true});
   vs.forEach((v,k)=>v.addEventListener('click',()=>c.scrollTo({left:v.offsetLeft+v.offsetWidth/2-c.clientWidth/2,behavior:quieto?'auto':'smooth'})));
+  const av=document.createElement('div'),tr=av.appendChild(document.createElement('i'));av.className='avance';av.setAttribute('aria-hidden','true');c.after(av);
+  const mueve=()=>{const f=Math.max(.12,c.clientWidth/c.scrollWidth),m=c.scrollWidth-c.clientWidth;tr.style.width=(f*100)+'%';tr.style.left=((m>0?c.scrollLeft/m:0)*(1-f)*100)+'%'};
+  c.addEventListener('scroll',mueve,{passive:true});mueve();
   pon(0);
 }
 function coleccion(C,e){
