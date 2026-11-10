@@ -115,7 +115,8 @@
    "y": 0.7091,
    "linea": 2,
    "tipo": "chica",
-   "nombre": "T. Animacion"
+   "nombre": "T. Animacion",
+   "contenido": "animacion"
   },
   {
    "x": 0.8228,
