@@ -66,7 +66,12 @@
    "tipo": "principal",
    "nombre": "Theo y Simón",
    "url": "https://open.spotify.com/intl-es/artist/2Ab0XAShZJTAEQoJFq0nRM",
-   "destino": "Spotify"
+   "destino": "Spotify",
+   "embed": {
+    "src": "https://open.spotify.com/embed/artist/2Ab0XAShZJTAEQoJFq0nRM",
+    "alto": 352,
+    "titulo": "Theo y Simón en Spotify"
+   }
   },
   {
    "x": 0.1999,
@@ -75,7 +80,12 @@
    "tipo": "principal",
    "nombre": "YouTube",
    "url": "https://www.youtube.com/@ElAhijado4",
-   "destino": "mi canal"
+   "destino": "mi canal",
+   "embed": {
+    "src": "https://www.youtube-nocookie.com/embed/lta22JNHBfY",
+    "video": true,
+    "titulo": "Último Piso, video"
+   }
   },
   {
    "x": 0.2965,
@@ -91,15 +101,6 @@
    "linea": 4,
    "tipo": "principal",
    "nombre": "Calcos"
-  },
-  {
-   "x": 0.3787,
-   "y": 0.0621,
-   "linea": 3,
-   "tipo": "chica",
-   "nombre": "Ultimo Piso (video)",
-   "url": "https://www.youtube.com/watch?v=lta22JNHBfY",
-   "destino": "YouTube"
   },
   {
    "x": 0.8267,
@@ -130,5 +131,16 @@
   2,
   4,
   5
+ ],
+ "guardadas": [
+  {
+   "x": 0.3787,
+   "y": 0.0621,
+   "linea": 3,
+   "tipo": "chica",
+   "nombre": "Ultimo Piso (video)",
+   "url": "https://www.youtube.com/watch?v=lta22JNHBfY",
+   "destino": "YouTube"
+  }
  ]
 }
