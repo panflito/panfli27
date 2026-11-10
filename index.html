@@ -51,9 +51,9 @@ h1{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);w
   text-shadow:0 0 2px var(--papel),0 0 2px var(--papel),0 0 4px var(--papel),0 0 4px var(--papel)}
 /* zona de toque cómoda para el dedo */
 .parada button{position:absolute;left:0;top:0}
-.parada .nombre{background:rgba(251,250,247,.84);box-shadow:0 0 5px 3px rgba(251,250,247,.84)}
+.parada .nombre{background:#fff;border-color:var(--c);text-shadow:none}
 .parada button::before{content:"";position:absolute;left:-20px;top:-20px;width:40px;height:40px;border-radius:50%}
-.parada button:active .nombre,.parada button:focus-visible .nombre{border-color:var(--c);background:var(--papel);box-shadow:none;text-shadow:none}
+.parada button:active .nombre,.parada button:focus-visible .nombre{background:var(--c);color:#fff}
 button:focus-visible{outline:none}
 .parada button:focus-visible .punto{box-shadow:0 0 0 3px var(--tinta)}
 
