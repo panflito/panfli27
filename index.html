@@ -90,11 +90,11 @@ button:focus-visible{outline:none}
 .contenido>*{animation:entra .22s ease-out both}
 @keyframes entra{from{opacity:0;transform:translateY(6px)}}
 /* parada que es un link: un solo botón, a dónde va y listo */
-.salida{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:14px auto 0;padding:26px 40px 26px;border-radius:999px;color:var(--papel);text-align:center;
+.salida{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:14px auto 0;padding:17px 38px 17px;border-radius:999px;color:var(--papel);text-align:center;
   background:var(--c);text-shadow:0 1px 2px color-mix(in srgb,var(--t0) 70%,#000);
   box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--t0) 75%,#000),inset 0 -9px 0 var(--t0),inset 0 7px 0 var(--t2),3px 6px 10px rgba(0,0,0,.2)}
 /* la línea de brillo: un arco que acompaña la curva */
-.salida::before{content:"";position:absolute;inset:9px 10px;border-radius:999px;border:4px solid transparent;border-top-color:var(--t3);pointer-events:none}
+.salida::before{content:"";position:absolute;inset:8px 9px;border-radius:999px;border:4px solid transparent;border-top-color:var(--t3);pointer-events:none}
 .salida:active{transform:translateY(2px)}
 .previa{display:block;width:100%;max-width:420px;margin:22px auto 0;border:0;border-radius:14px;background:#eceae5}
 .previa.video{aspect-ratio:16/9;height:auto}
@@ -126,6 +126,13 @@ button:focus-visible{outline:none}
 .texto .fotos img{width:100%;min-width:0;max-height:none;height:auto;margin:0;object-fit:cover}
 .fotos.recto,.fotos.recto .ff,.fotos.recto .fc{gap:0}
 .texto .fotos.recto img{border-radius:0}
+/* cinta de multimedia: se desliza al costado, la del centro es la que se mueve */
+.cinta{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;margin:26px -20px 0;
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(to right,transparent,#000 16%,#000 84%,transparent)}
+.cinta::-webkit-scrollbar{display:none}
+.tira{display:flex;gap:12px;box-sizing:content-box;align-items:center}
+.tira video{flex:none;display:block;height:270px;width:auto;border-radius:10px;scroll-snap-align:center;opacity:.4;transition:opacity .2s;background:#eceae5}
+.tira video.aqui{opacity:1}
 /* dibujos en tinta sobre blanco: se funden con el papel de la página */
 .fotos.tinta .ff{gap:14px}
 .fotos.tinta img{mix-blend-mode:multiply}
@@ -313,6 +320,20 @@ function mostrar(i){
 function pagina(C){
   const t=document.createElement('article');t.className='texto hoja';t.innerHTML='<h2></h2><div></div>';
   t.children[0].textContent=C.titulo;t.children[1].innerHTML=C.html;cont.appendChild(t);
+  t.querySelectorAll('.cinta').forEach(cinta);
+}
+function cinta(c){
+  const tira=c.firstElementChild,vs=[...tira.children],H=270;let act=-1,tm=0;
+  const anchos=vs.map(v=>{const w=Math.round(H*v.width/v.height);v.style.width=w+'px';return w});
+  const W=c.clientWidth;tira.style.paddingLeft=Math.max(0,(W-anchos[0])/2)+'px';tira.style.paddingRight=Math.max(0,(W-anchos[anchos.length-1])/2)+'px';
+  tira.style.width=(anchos.reduce((a,b)=>a+b,0)+12*(vs.length-1))+'px';
+  const centro=()=>{const m=c.scrollLeft+c.clientWidth/2;let j=0,d=1e9;vs.forEach((v,k)=>{const dd=Math.abs(v.offsetLeft+v.offsetWidth/2-m);if(dd<d){d=dd;j=k}});return j};
+  const pon=j=>{if(j===act)return;if(act>=0){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}act=j;
+    vs.forEach((v,k)=>{v.classList.toggle('aqui',k===j);if(k!==j)v.pause()});
+    const v=vs[j];if(!v.src)v.src=v.dataset.v;const p=v.play();p&&p.catch(()=>{v.controls=true})};
+  c.addEventListener('scroll',()=>{const j=centro();vs.forEach((v,k)=>v.classList.toggle('aqui',k===j));clearTimeout(tm);tm=setTimeout(()=>pon(centro()),120)},{passive:true});
+  vs.forEach((v,k)=>v.addEventListener('click',()=>c.scrollTo({left:v.offsetLeft+v.offsetWidth/2-c.clientWidth/2,behavior:quieto?'auto':'smooth'})));
+  pon(0);
 }
 function coleccion(C,e){
   const rueda=document.createElement('div'),pista=rueda.appendChild(document.createElement('div')),texto=document.createElement('article');rueda.className='rueda';pista.className='pista';texto.className='texto';
