@@ -21,7 +21,7 @@ body{margin:0}
 :root{
   --papel:#fbfaf7; --tinta:#141312;
   --titulo:"Gill Sans","Gill Sans MT","Gill Sans Nova",Lato,"Trebuchet MS",sans-serif;
-  --celda:150px; --alto:124px; --via:96px; --g:15.5px;
+  --celda:150px; --alto:158px; --via:130px; --g:15.5px;
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -43,16 +43,16 @@ h1{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);w
 /* parada: circulito de estación sobre la línea */
 .parada{position:absolute;width:0;height:0}
 .punto{position:absolute;left:0;top:0;width:var(--d);height:var(--d);margin:calc(var(--d) / -2) 0 0 calc(var(--d) / -2);border-radius:50%;
-  background:var(--papel);border:calc(var(--d) * .27) solid var(--c);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+  background:#fff;border:calc(var(--d) * .14) solid var(--tinta);box-shadow:0 1px 2px rgba(0,0,0,.25)}
 .parada.principal{--d:15px}
 .parada.chica{--d:9px}
 /* nombre en diagonal hacia arriba, como en el plano del subte */
-.nombre{position:absolute;left:7px;bottom:5px;white-space:nowrap;font-weight:600;font-size:13.5px;line-height:1;color:var(--c);transform-origin:0 100%;transform:rotate(-45deg);padding:3px 2px;
+.nombre{position:absolute;left:5px;bottom:4px;white-space:nowrap;font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;line-height:1;color:var(--c);transform-origin:0 100%;transform:rotate(-45deg);padding:4px 8px 3px;border:1.5px solid transparent;border-radius:999px;
   text-shadow:0 0 2px var(--papel),0 0 2px var(--papel),0 0 4px var(--papel),0 0 4px var(--papel)}
 /* zona de toque cómoda para el dedo */
 .parada button{position:absolute;left:0;top:0}
 .parada button::before{content:"";position:absolute;left:-20px;top:-20px;width:40px;height:40px;border-radius:50%}
-.parada button:hover .nombre,.parada button:active .nombre,.parada button:focus-visible .nombre{background:#fff23a;text-shadow:none}
+.parada button:active .nombre,.parada button:focus-visible .nombre{border-color:var(--c);background:var(--papel);text-shadow:none}
 button:focus-visible{outline:none}
 .parada button:focus-visible .punto{box-shadow:0 0 0 3px var(--tinta)}
 
@@ -61,9 +61,8 @@ button:focus-visible{outline:none}
 .vista[hidden]{display:none}
 .barra{position:sticky;top:0;z-index:2;height:calc(var(--alto) + 10px);background:linear-gradient(var(--papel) calc(100% - 10px),transparent)}
 /* la casita: vuelve al dibujo */
-.casita{position:absolute;z-index:3;left:max(8px,env(safe-area-inset-left,0px));top:6px;width:46px;height:46px;border-radius:50%;background:var(--papel);box-shadow:0 0 8px 6px var(--papel)}
-.casita img{display:block;width:100%;height:100%}
-.casita.espera{visibility:hidden}
+.casita{position:absolute;z-index:3;left:max(10px,env(safe-area-inset-left,0px));top:8px;width:42px;height:42px;border-radius:50%;background:#fff;border:1.5px solid var(--tinta);box-shadow:0 0 8px 6px var(--papel)}
+.casita svg{display:block;width:100%;height:100%}
 .casita:focus-visible{box-shadow:0 0 0 3px var(--tinta)}
 /* el riel se desliza al costado; cada parada frena en el centro */
 .riel{height:var(--alto);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
@@ -80,11 +79,10 @@ button:focus-visible{outline:none}
     var(--papel);
   -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.72),#000 50%);mask-image:linear-gradient(to bottom,rgba(0,0,0,.72),#000 50%)}
 .celda button{position:absolute;inset:0;width:100%}
-.celda .ancla{position:absolute;left:50%;top:calc(var(--via) + var(--g) / 2);width:0;height:0;--d:15px}
-.celda .nombre{font-size:12.5px}
-.celda .punto{border-color:var(--t0)}
-.celda.aqui .nombre{background:#fff23a;text-shadow:none;color:var(--tinta)}
-.celda.aqui .punto{border-color:var(--tinta)}
+.celda .ancla{position:absolute;left:50%;top:calc(var(--via) + var(--g) / 2);width:0;height:0;--d:20px}
+.celda .nombre{left:6px;bottom:7px;font-size:11.5px;transition:border-color .15s}
+/* la parada en la que estamos: el nombre queda envuelto como un botón */
+.celda.aqui .nombre{border-color:var(--c);background:var(--papel);text-shadow:none}
 .celda button:focus-visible .punto{box-shadow:0 0 0 3px var(--tinta)}
 
 .contenido{max-width:560px;margin:0 auto;padding:18px max(20px,env(safe-area-inset-right,0px)) 96px max(20px,env(safe-area-inset-left,0px));min-height:calc(100% - var(--alto) - 10px)}
@@ -98,12 +96,13 @@ button:focus-visible{outline:none}
 .salida span{font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.92}
 .pronto{margin:13vh 0 0;text-align:center;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
 /* columnitas: se elige deslizando los nombres; la del centro es la que se lee */
-.rueda{display:flex;gap:4px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -20px;padding:2px 50%;
+.rueda{display:flex;height:132px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -20px;padding:0 50%;
   -webkit-mask-image:linear-gradient(to right,transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(to right,transparent,#000 22%,#000 78%,transparent)}
 .rueda::-webkit-scrollbar{display:none}
-.rueda button{flex:none;scroll-snap-align:center;padding:10px 12px;font-size:15px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:var(--tinta);opacity:.32;transition:opacity .15s}
+.rueda button{position:relative;flex:0 0 30px;height:100%;scroll-snap-align:center;color:var(--tinta);opacity:.34;transition:opacity .15s}
+.rueda button span{position:absolute;left:50%;bottom:6px;margin-left:-8px;padding:5px 6px 4px;white-space:nowrap;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1;transform-origin:0 100%;transform:rotate(-45deg)}
 .rueda button.aqui{opacity:1;color:var(--c)}
-.texto{margin-top:22px;font-size:17.5px;line-height:1.55;overflow-wrap:break-word}
+.texto{margin-top:14px;font-size:17.5px;line-height:1.55;overflow-wrap:break-word}
 .texto h2{margin:0 0 4px;font-size:21px;line-height:1.2;font-weight:600}
 .texto .dato{margin:0 0 20px;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
 .texto .sangria{padding-left:1.8em}
@@ -123,7 +122,7 @@ button:focus-visible{outline:none}
 
 <div class="vista" id="vista" hidden>
   <div class="barra">
-    <button class="casita" id="casita" aria-label="Volver al dibujo"><img src="img/mapa.png" alt=""></button>
+    <button class="casita" id="casita" aria-label="Volver al dibujo"></button>
     <nav class="riel" id="riel" aria-label="Recorrido"><ol class="via" id="via"></ol></nav>
   </div>
   <main class="contenido" id="contenido"></main>
@@ -148,6 +147,10 @@ fetch('mapa.json').then(r=>r.json()).then(datos=>{
     M.paradas.filter(p=>p.linea==k).sort((a,b)=>(a.tipo==='principal'?0:1)-(b.tipo==='principal'?0:1))
      .forEach(p=>E.push({p,l,k,id:slug(p.nombre)}))});
   n=E.length;
+  {let d='';const T=2.6*2*Math.PI,P=5;
+   for(let j=0;j<P;j++){let pts=[];for(let q=0;q<=24;q++){const u=(j+q/24)/P,a=u*T-Math.PI/2,rr=3+u*12.5;pts.push((21+Math.cos(a)*rr).toFixed(2)+' '+(21+Math.sin(a)*rr).toFixed(2))}
+    d+='<path d="M'+pts.join('L')+'" stroke="'+M.lineas[M.orden[j]].tonos[1]+'"/>'}
+   casita.innerHTML='<svg viewBox="0 0 42 42" fill="none" stroke-width="3.4" stroke-linecap="round" aria-hidden="true">'+d+'</svg>'}
   // inicio: las paradas sobre el dibujo. Tocar cualquiera abre la principal de su línea.
   const ul=$('paradas');
   M.paradas.forEach(p=>{
@@ -198,23 +201,23 @@ function abrir(i,desde){
   if(animando){animando.forEach(a=>a.finish())}
   abierta=true;vista.hidden=false;document.body.classList.add('abierta');vista.scrollTop=0;
   actual=-1;ir(i,false);
-  if(quieto||!desde||!vista.animate){inicio.classList.add('fuera');casita.classList.remove('espera');return}
-  casita.classList.add('espera');mapa.classList.add('vuela');
+  if(quieto||!desde||!vista.animate){inicio.classList.add('fuera');return}
+  mapa.classList.add('vuela');
   const op={duration:480,easing:'cubic-bezier(.5,0,.2,1)',fill:'both'};
-  const a1=mapa.animate([{transform:'none'},{transform:rectCasita()}],op);
+  const a1=mapa.animate([{transform:'none',opacity:1},{opacity:1,offset:.6},{transform:rectCasita(),opacity:0}],op);
   const a2=vista.animate([{clipPath:`circle(0px at ${desde.x}px ${desde.y}px)`},{clipPath:`circle(150vmax at ${desde.x}px ${desde.y}px)`}],{duration:620,easing:'cubic-bezier(.4,0,.6,1)'});
   animando=[a1,a2];
-  a1.onfinish=()=>{inicio.classList.add('fuera');casita.classList.remove('espera');mapa.classList.remove('vuela');a1.cancel();animando=null};
+  a1.onfinish=()=>{inicio.classList.add('fuera');mapa.classList.remove('vuela');a1.cancel();animando=null};
 }
 function cerrar(){
   if(!abierta)return;if(animando){animando.forEach(a=>a.finish())}
   abierta=false;actual=-1;document.body.classList.remove('abierta');inicio.classList.remove('fuera');
   if(quieto||!vista.animate){vista.hidden=true;return}
-  casita.classList.add('espera');mapa.classList.add('vuela');
-  const a1=mapa.animate([{transform:rectCasita()},{transform:'none'}],{duration:440,easing:'cubic-bezier(.3,0,.2,1)',fill:'both'});
+  mapa.classList.add('vuela');
+  const a1=mapa.animate([{transform:rectCasita(),opacity:0},{opacity:1,offset:.4},{transform:'none',opacity:1}],{duration:440,easing:'cubic-bezier(.3,0,.2,1)',fill:'both'});
   const a2=vista.animate([{opacity:1},{opacity:0}],{duration:300,fill:'both'});
   animando=[a1,a2];
-  a1.onfinish=()=>{vista.hidden=true;a2.cancel();a1.cancel();mapa.classList.remove('vuela');casita.classList.remove('espera');animando=null};
+  a1.onfinish=()=>{vista.hidden=true;a2.cancel();a1.cancel();mapa.classList.remove('vuela');animando=null};
 }
 casita.addEventListener('click',()=>{if(history.state&&history.state.v)history.back();else{history.replaceState(null,'',location.pathname+location.search);cerrar()}});
 addEventListener('popstate',()=>desdeHash(true));
@@ -282,7 +285,7 @@ function columnitas(C){
     if(abierta&&E[actual]&&E[actual].p.contenido==='columnitas')history.replaceState(history.state,'','#'+E[actual].id+'/'+c.id);
     contar('leer_columnita',{columnita:c.nombre});
   };
-  C.forEach((c,j)=>{const b=document.createElement('button');b.type='button';b.textContent=c.nombre;b.addEventListener('click',()=>elegir(j,'suave'));rueda.appendChild(b)});
+  C.forEach((c,j)=>{const b=document.createElement('button');b.type='button';b.appendChild(document.createElement('span')).textContent=c.nombre;b.addEventListener('click',()=>elegir(j,'suave'));rueda.appendChild(b)});
   rueda.addEventListener('scroll',()=>{clearTimeout(t);t=setTimeout(()=>{
     const m=rueda.scrollLeft+rueda.clientWidth/2;let j=0,d=1e9;
     [...rueda.children].forEach((b,k)=>{const dd=Math.abs(b.offsetLeft+b.offsetWidth/2-m);if(dd<d){d=dd;j=k}});elegir(j,false)},90)},{passive:true});
