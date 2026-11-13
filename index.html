@@ -6,7 +6,7 @@
 <meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con sus líneas: Theo y Simón, YouTube, cuentos y columnitas, arte visual y más.">
 <title>PANFLITO</title>
 <link rel="preload" href="img/mapa.png" as="image" fetchpriority="high">
-<link rel="preload" href="mapa.json?v=202611131852" as="fetch" crossorigin>
+<link rel="preload" href="mapa.json?v=202611131857" as="fetch" crossorigin>
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
@@ -176,9 +176,12 @@ const inicio=$('inicio'),mapa=$('mapa'),dibujo=$('dibujo'),vista=$('vista'),riel
 let M,E=[],n=0,actual=-1,abierta=false,animando=null;
 
 const tonos=(el,l)=>{el.style.setProperty('--c',l.tonos[1]);l.tonos.forEach((t,i)=>el.style.setProperty('--t'+i,t))};
-const ancho=()=>via.firstElementChild?via.firstElementChild.offsetWidth:150;
+// separación entre paradas: en el celular las vecinas quedan con aire del borde; en pantallas anchas se abre para que ningún color se repita
+let paso=150;
+const medirPaso=()=>{const W=riel.clientWidth||innerWidth;const mx=Math.max(1,...Object.values(E.reduce((o,e)=>(o[e.k]=(o[e.k]||0)+1,o),{})));paso=Math.round(Math.max(Math.min(150,W*.36),n>mx?W/(n-mx):0));document.documentElement.style.setProperty('--celda',paso+'px')};
+const ancho=()=>paso;
 
-fetch('mapa.json?v=202611131852').then(r=>r.json()).then(datos=>{
+fetch('mapa.json?v=202611131857').then(r=>r.json()).then(datos=>{
   M=datos;
   // recorrido: las líneas en orden, y de cada una primero la principal y después las chicas. Es circular.
   M.orden.forEach(k=>{const l=M.lineas[k];
@@ -202,6 +205,7 @@ fetch('mapa.json?v=202611131852').then(r=>r.json()).then(datos=>{
     li.appendChild(b);ul.appendChild(li);
   });
   // la línea recta: tres vueltas seguidas para que no tenga principio ni fin
+  medirPaso();
   for(let v=0;v<3;v++)E.forEach((e,i)=>{
     const li=document.createElement('li'),b=document.createElement('button');
     li.className='celda';li.dataset.i=i;tonos(li,e.l);
@@ -242,7 +246,7 @@ function abrirLinea(k,ev){const i=E.findIndex(e=>e.k==k);if(i<0)return;
 function rectCasita(){const a=casita.getBoundingClientRect(),b=mapa.getBoundingClientRect();return `translate(${a.left-b.left}px,${a.top-b.top}px) scale(${a.width/b.width})`}
 function abrir(i,desde){
   if(animando){animando.forEach(a=>a.finish())}
-  abierta=true;vista.hidden=false;document.body.classList.add('abierta');vista.scrollTop=0;
+  abierta=true;vista.hidden=false;document.body.classList.add('abierta');vista.scrollTop=0;medirPaso();
   actual=-1;ir(i,false);
   if(quieto||!desde||!vista.animate){inicio.classList.add('fuera');return}
   mapa.classList.add('vuela');
@@ -298,11 +302,11 @@ riel.addEventListener('scroll',()=>{
   },130);
 },{passive:true});
 let anchoV=innerWidth;
-addEventListener('resize',()=>{if(innerWidth===anchoV)return;anchoV=innerWidth;if(abierta&&actual>=0)riel.scrollLeft=(n+actual+.5)*ancho()-riel.clientWidth/2});
+addEventListener('resize',()=>{if(innerWidth===anchoV)return;anchoV=innerWidth;medirPaso();if(abierta&&actual>=0)riel.scrollLeft=(n+actual+.5)*ancho()-riel.clientWidth/2});
 
 /* ---- lo que hay en cada parada ---- */
 const datos={},elegidas={};
-const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611131852').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
+const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611131857').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
 function mostrar(i){
   mostrada=i;const e=E[i],p=e.p;tonos(cont,e.l);cont.textContent='';vista.scrollTop=0;
   contar('ver_parada',{linea:e.l.letra,parada:p.nombre});
@@ -342,7 +346,7 @@ function cinta(c){
   const centro=()=>{const m=c.scrollLeft+c.clientWidth/2;let j=0,d=1e9;vs.forEach((v,k)=>{const dd=Math.abs(v.offsetLeft+v.offsetWidth/2-m);if(dd<d){d=dd;j=k}});return j};
   const pon=j=>{if(j===act)return;if(act>=0){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}act=j;
     vs.forEach((v,k)=>{v.classList.toggle('aqui',k===j);if(k!==j)v.pause()});
-    const v=vs[j];if(!v.src)v.src=v.dataset.v;const p=v.play();p&&p.catch(()=>{v.controls=true})};
+    const v=vs[j];v.muted=true;if(!v.src)v.src=v.dataset.v;const p=v.play();p&&p.catch(e=>{if(e&&e.name==='NotAllowedError')v.controls=true})};
   c.addEventListener('scroll',()=>{const j=centro();vs.forEach((v,k)=>v.classList.toggle('aqui',k===j));clearTimeout(tm);tm=setTimeout(()=>pon(centro()),120)},{passive:true});
   vs.forEach((v,k)=>v.addEventListener('click',()=>c.scrollTo({left:v.offsetLeft+v.offsetWidth/2-c.clientWidth/2,behavior:quieto?'auto':'smooth'})));
   const av=document.createElement('div'),tr=av.appendChild(document.createElement('i'));av.className='avance';av.setAttribute('aria-hidden','true');c.after(av);
