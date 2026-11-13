@@ -6,7 +6,7 @@
 <meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con sus líneas: Theo y Simón, YouTube, cuentos y columnitas, arte visual y más.">
 <title>PANFLITO</title>
 <link rel="preload" href="img/mapa.png" as="image" fetchpriority="high">
-<link rel="preload" href="mapa.json" as="fetch" crossorigin>
+<link rel="preload" href="mapa.json?v=202611131852" as="fetch" crossorigin>
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
@@ -178,7 +178,7 @@ let M,E=[],n=0,actual=-1,abierta=false,animando=null;
 const tonos=(el,l)=>{el.style.setProperty('--c',l.tonos[1]);l.tonos.forEach((t,i)=>el.style.setProperty('--t'+i,t))};
 const ancho=()=>via.firstElementChild?via.firstElementChild.offsetWidth:150;
 
-fetch('mapa.json').then(r=>r.json()).then(datos=>{
+fetch('mapa.json?v=202611131852').then(r=>r.json()).then(datos=>{
   M=datos;
   // recorrido: las líneas en orden, y de cada una primero la principal y después las chicas. Es circular.
   M.orden.forEach(k=>{const l=M.lineas[k];
@@ -302,7 +302,7 @@ addEventListener('resize',()=>{if(innerWidth===anchoV)return;anchoV=innerWidth;i
 
 /* ---- lo que hay en cada parada ---- */
 const datos={},elegidas={};
-const traer=k=>datos[k]=datos[k]||fetch(k+'.json').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
+const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611131852').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
 function mostrar(i){
   mostrada=i;const e=E[i],p=e.p;tonos(cont,e.l);cont.textContent='';vista.scrollTop=0;
   contar('ver_parada',{linea:e.l.letra,parada:p.nombre});
