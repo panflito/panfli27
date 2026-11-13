@@ -6,7 +6,7 @@
 <meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con sus líneas: Theo y Simón, YouTube, cuentos y columnitas, arte visual y más.">
 <title>PANFLITO</title>
 <link rel="preload" href="img/mapa.png" as="image" fetchpriority="high">
-<link rel="preload" href="mapa.json?v=202611131857" as="fetch" crossorigin>
+<link rel="preload" href="mapa.json?v=202611131909" as="fetch" crossorigin>
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
@@ -181,7 +181,7 @@ let paso=150;
 const medirPaso=()=>{const W=riel.clientWidth||innerWidth;const mx=Math.max(1,...Object.values(E.reduce((o,e)=>(o[e.k]=(o[e.k]||0)+1,o),{})));paso=Math.round(Math.max(Math.min(150,W*.36),n>mx?W/(n-mx):0));document.documentElement.style.setProperty('--celda',paso+'px')};
 const ancho=()=>paso;
 
-fetch('mapa.json?v=202611131857').then(r=>r.json()).then(datos=>{
+fetch('mapa.json?v=202611131909').then(r=>r.json()).then(datos=>{
   M=datos;
   // recorrido: las líneas en orden, y de cada una primero la principal y después las chicas. Es circular.
   M.orden.forEach(k=>{const l=M.lineas[k];
@@ -273,7 +273,7 @@ function desdeHash(conAnim){
   const [a,sub]=decodeURIComponent(location.hash.slice(1)).split('/'),i=E.findIndex(e=>e.id===a);
   if(i<0){if(abierta)cerrar();return}
   if(sub)elegidas[a]=sub;
-  if(!abierta)abrir(i,null);else ir(i,true);
+  if(!abierta)abrir(i,null);else if(i===actual&&sub)mostrar(i);else ir(i,true);
 }
 
 /* ---- moverse por la línea ---- */
@@ -306,7 +306,7 @@ addEventListener('resize',()=>{if(innerWidth===anchoV)return;anchoV=innerWidth;m
 
 /* ---- lo que hay en cada parada ---- */
 const datos={},elegidas={};
-const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611131857').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
+const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611131909').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
 function mostrar(i){
   mostrada=i;const e=E[i],p=e.p;tonos(cont,e.l);cont.textContent='';vista.scrollTop=0;
   contar('ver_parada',{linea:e.l.letra,parada:p.nombre});
@@ -345,8 +345,11 @@ function cinta(c){
   tira.style.width=(anchos.reduce((a,b)=>a+b,0)+12*(vs.length-1))+'px';
   const centro=()=>{const m=c.scrollLeft+c.clientWidth/2;let j=0,d=1e9;vs.forEach((v,k)=>{const dd=Math.abs(v.offsetLeft+v.offsetWidth/2-m);if(dd<d){d=dd;j=k}});return j};
   const pon=j=>{if(j===act)return;if(act>=0){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}act=j;
-    vs.forEach((v,k)=>{v.classList.toggle('aqui',k===j);if(k!==j)v.pause()});
-    const v=vs[j];v.muted=true;if(!v.src)v.src=v.dataset.v;const p=v.play();p&&p.catch(e=>{if(e&&e.name==='NotAllowedError')v.controls=true})};
+    // se mueven la del centro y sus dos vecinas, así al deslizar ya vienen andando; el resto queda cargado y quieto
+    vs.forEach((v,k)=>{v.classList.toggle('aqui',k===j);
+      if(Math.abs(k-j)>1){v.pause();return}
+      const p=v.play();p&&p.catch(e=>{if(k===j&&e&&e.name==='NotAllowedError')v.controls=true})})};
+  vs.forEach(v=>{v.muted=true;v.preload='auto';v.src=v.dataset.v});
   c.addEventListener('scroll',()=>{const j=centro();vs.forEach((v,k)=>v.classList.toggle('aqui',k===j));clearTimeout(tm);tm=setTimeout(()=>pon(centro()),120)},{passive:true});
   vs.forEach((v,k)=>v.addEventListener('click',()=>c.scrollTo({left:v.offsetLeft+v.offsetWidth/2-c.clientWidth/2,behavior:quieto?'auto':'smooth'})));
   const av=document.createElement('div'),tr=av.appendChild(document.createElement('i'));av.className='avance';av.setAttribute('aria-hidden','true');c.after(av);
@@ -378,6 +381,9 @@ function coleccion(C,e){
     if(j!==enVivo){if(enVivo>=0){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}enVivo=j;[...pista.children].forEach((b,k)=>b.classList.toggle('aqui',k===j))}
     clearTimeout(t);t=setTimeout(()=>elegir(centro(),false),110)},{passive:true});
   cont.append(rueda,texto);
+  // apenas se abre la sección, sus videos se van bajando de fondo, de a uno
+  if(!e.tibio){e.tibio=true;const vid=[];C.forEach(c=>(c.html.match(/data-v="[^"]+"/g)||[]).forEach(m=>vid.push(m.slice(8,-1))));
+    const sig=()=>{const f=vid.shift();if(f)fetch(f).then(x=>x.blob()).catch(()=>{}).then(sig)};if(vid.length)setTimeout(sig,500)}
   ruedaMouse(rueda,(d,probar)=>{const j=(enVivo<0?sel:enVivo)+d;if(j<0||j>=C.length)return false;if(!probar){enVivo=j;elegir(j,'suave')}return true});
   pista.style.width=(C.length*58)+'px';pista.style.setProperty('--pad',(rueda.clientWidth/2)+'px');
   const j0=Math.max(0,C.findIndex(c=>c.id===elegidas[e.id]));elegir(j0,'ya');
