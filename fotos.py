@@ -32,6 +32,7 @@ def arma(disp,ps):
     if disp=='una-dos' and n>2: return g[0]('')+fila(list(range(1,n)))
     return fila(list(range(n)))
 for it in D:
+    if it['id'] not in CFG: continue   # secciones sin fotos de proyecto (taller de animación)
     c=CFG[it['id']]; ps=[p for p in c['fotos'] if p.get('usar',True)]
     texto=re.split(r'<div class="fotos|<img',it['html'])[0]
     it['html']=texto+'<div class="fotos'+('' if c.get('redondo',True) else ' recto')+'">'+arma(c['disp'],ps)+'</div>'

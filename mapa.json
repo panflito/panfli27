@@ -111,14 +111,6 @@
    "nombre": "xx"
   },
   {
-   "x": 0.1316,
-   "y": 0.7091,
-   "linea": 2,
-   "tipo": "chica",
-   "nombre": "T. Animacion",
-   "contenido": "animacion"
-  },
-  {
    "x": 0.8228,
    "y": 0.1479,
    "linea": 5,
@@ -143,6 +135,14 @@
    "nombre": "Ultimo Piso (video)",
    "url": "https://www.youtube.com/watch?v=lta22JNHBfY",
    "destino": "YouTube"
+  },
+  {
+   "x": 0.1316,
+   "y": 0.7091,
+   "linea": 2,
+   "tipo": "chica",
+   "nombre": "T. Animacion",
+   "contenido": "animacion"
   }
  ]
 }
