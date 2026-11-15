@@ -6,7 +6,7 @@
 <meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con sus líneas: Theo y Simón, YouTube, cuentos y columnitas, arte visual y más.">
 <title>PANFLITO</title>
 <link rel="preload" href="img/mapa.png" as="image" fetchpriority="high">
-<link rel="preload" href="mapa.json?v=202611152157" as="fetch" crossorigin>
+<link rel="preload" href="mapa.json?v=202611152212" as="fetch" crossorigin>
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
@@ -185,7 +185,7 @@ let paso=150;
 const medirPaso=()=>{const W=riel.clientWidth||innerWidth;const mx=Math.max(1,...Object.values(E.reduce((o,e)=>(o[e.k]=(o[e.k]||0)+1,o),{})));paso=Math.round(Math.max(Math.min(150,W*.36),n>mx?W/(n-mx):0));document.documentElement.style.setProperty('--celda',paso+'px')};
 const ancho=()=>paso;
 
-fetch('mapa.json?v=202611152157').then(r=>r.json()).then(datos=>{
+fetch('mapa.json?v=202611152212').then(r=>r.json()).then(datos=>{
   M=datos;
   // recorrido: las líneas en orden, y de cada una primero la principal y después las chicas. Es circular.
   M.orden.forEach(k=>{const l=M.lineas[k];
@@ -220,10 +220,7 @@ fetch('mapa.json?v=202611152157').then(r=>r.json()).then(datos=>{
     li.appendChild(b);via.appendChild(li);
   });
   desdeHash(false);
-  const fondo=()=>{const ks=[...new Set(E.map(e=>e.p.contenido).filter(Boolean))],fotos=[];
-    const sig=()=>{const f=fotos.shift();if(!f)return;const im=new Image();im.onload=im.onerror=sig;im.src=f};
-    ks.reduce((q,k)=>q.then(()=>traer(k)).then(C=>[].concat(C).forEach(c=>(c.html.match(/src="[^"]+"/g)||[]).forEach(m=>fotos.push(m.slice(5,-1))))).catch(()=>{}),Promise.resolve()).then(sig)};
-  const cuando=()=>('requestIdleCallback' in window?requestIdleCallback(fondo,{timeout:2500}):setTimeout(fondo,900));
+  const cuando=()=>('requestIdleCallback' in window?requestIdleCallback(arranque,{timeout:2500}):setTimeout(arranque,900));
   if(document.readyState==='complete')cuando();else addEventListener('load',cuando);
 }).catch(()=>{});
 
@@ -310,9 +307,32 @@ addEventListener('resize',()=>{if(innerWidth===anchoV)return;anchoV=innerWidth;m
 
 /* ---- lo que hay en cada parada ---- */
 const datos={},elegidas={};
-const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611152157').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
+const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611152212').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
+
+/* ---- carga anticipada ----
+   Al entrar: el mapa; después, lo primero de cada línea en este orden: celeste, amarilla, violeta, verde, roja.
+   Al abrir una parada: todo lo de esa parada, después lo primero de la de la derecha y después lo de la izquierda.
+   Una sola cola, de a un archivo por vez, para no competir con lo que se está mirando. */
+const PRIORIDAD=['5','2','4','3','1'];
+const cola=[],pedido=new Set();let cargando=false;
+const bajar=u=>new Promise(ok=>{if(/\.mp4$/.test(u))fetch(u).then(x=>x.blob()).catch(()=>{}).then(ok);else{const im=new Image();im.onload=im.onerror=ok;im.src=u}});
+const correr=()=>{if(cargando)return;const u=cola.shift();if(!u)return;cargando=true;bajar(u).then(()=>{cargando=false;correr()})};
+const pedir=(us,adelante)=>{us=us.filter(u=>!pedido.has(u));us.forEach(u=>pedido.add(u));if(adelante)cola.unshift(...us);else cola.push(...us);correr()};
+const archivos=(c,videos)=>{const h=c.html||'',out=(h.match(/ src="[^"]+"/g)||[]).map(m=>m.slice(6,-1));
+  if(videos)(h.match(/data-v="[^"]+"/g)||[]).forEach(m=>out.push(m.slice(8,-1)));return out};
+const conectados=new Set();
+const conectar=src=>{try{const o=new URL(src).origin;if(conectados.has(o))return;conectados.add(o);
+  const l=document.createElement('link');l.rel='preconnect';l.href=o;document.head.appendChild(l)}catch(e){}};
+// lo primero de una parada (textos y fotos del primer ítem) o todo (con sus videos)
+const deParada=(e,todo)=>{if(e.p.embed){conectar(e.p.embed.src);return Promise.resolve([])}
+  if(!e.p.contenido)return Promise.resolve([]);
+  return traer(e.p.contenido).then(C=>{C=[].concat(C);return (todo?C:C.slice(0,1)).flatMap(c=>archivos(c,todo))}).catch(()=>[])};
+const arranque=()=>PRIORIDAD.flatMap(k=>E.filter(e=>String(e.k)===k))
+  .reduce((q,e)=>q.then(()=>deParada(e,false)).then(us=>pedir(us,false)),Promise.resolve());
+const alAbrir=i=>{if(!n)return;Promise.all([deParada(E[i],true),deParada(E[(i+1)%n],false),deParada(E[(i-1+n)%n],false)])
+  .then(([a,b,c])=>pedir([...a,...b,...c],true))};
 function mostrar(i){
-  mostrada=i;const e=E[i],p=e.p;tonos(cont,e.l);cont.textContent='';vista.scrollTop=0;
+  mostrada=i;alAbrir(i);const e=E[i],p=e.p;tonos(cont,e.l);cont.textContent='';vista.scrollTop=0;
   contar('ver_parada',{linea:e.l.letra,parada:p.nombre});
   if(p.url){
     const a=document.createElement('a');a.className='salida';a.href=p.url;a.target='_blank';a.rel='noopener';
@@ -394,9 +414,6 @@ function coleccion(C,e){
     if(j!==enVivo){if(enVivo>=0){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}enVivo=j;[...pista.children].forEach((b,k)=>b.classList.toggle('aqui',k===j))}
     clearTimeout(t);t=setTimeout(()=>elegir(centro(),false),110)},{passive:true});
   cont.append(rueda,texto);
-  // apenas se abre la sección, sus videos se van bajando de fondo, de a uno
-  if(!e.tibio){e.tibio=true;const vid=[];C.forEach(c=>(c.html.match(/data-v="[^"]+"/g)||[]).forEach(m=>vid.push(m.slice(8,-1))));
-    const sig=()=>{const f=vid.shift();if(f)fetch(f).then(x=>x.blob()).catch(()=>{}).then(sig)};if(vid.length)setTimeout(sig,500)}
   ruedaMouse(rueda,(d,probar)=>{const j=(enVivo<0?sel:enVivo)+d;if(j<0||j>=C.length)return false;if(!probar){enVivo=j;elegir(j,'suave')}return true});
   pista.style.width=(C.length*58)+'px';pista.style.setProperty('--pad',(rueda.clientWidth/2)+'px');
   const j0=Math.max(0,C.findIndex(c=>c.id===elegidas[e.id]));elegir(j0,'ya');

@@ -18,9 +18,9 @@ def img(p,estilo):
         A=np.asarray(im).astype(int); k=max(3,im.width//60); borde=np.concatenate([A[:k].reshape(-1,3),A[-k:].reshape(-1,3),A[:,:k].reshape(-1,3),A[:,-k:].reshape(-1,3)])
         claro=borde[borde.sum(1)>600]; col=tuple(int(x) for x in np.median(claro if len(claro)>50 else borde,axis=0))
         m=round(im.width*p['margen']); lienzo=Image.new('RGB',(im.width+2*m,im.height+2*m),col); lienzo.paste(im,(m,m)); im=lienzo; print(p['f'],'margen',m,'px color',col)
-    im.save('img/docente/'+p['f'],quality=74,optimize=True,progressive=True)
+    web=os.path.splitext(p['f'])[0]+'.webp'; im.save('img/docente/'+web,'WEBP',quality=74,method=6)
     p['_a']=im.width/im.height; p['_w'],p['_h']=im.size
-    return lambda est:f'<img src="img/docente/{p["f"]}" width="{p["_w"]}" height="{p["_h"]}" decoding="async" alt="{alts.get(p["f"],"")}"'+(f' style="{est}"' if est else '')+'>'
+    return lambda est:f'<img src="img/docente/{web}" width="{p["_w"]}" height="{p["_h"]}" decoding="async" alt="{alts.get(p["f"],"")}"'+(f' style="{est}"' if est else '')+'>'
 def arma(disp,ps):
     g=[img(p,None) for p in ps]; a=[p['_a'] for p in ps]; n=len(ps)
     fila=lambda idx:'<div class="ff">'+''.join(g[i](f'flex:{a[i]:.4f} 1 0;aspect-ratio:{a[i]:.4f}') for i in idx)+'</div>' if len(idx)>1 else g[idx[0]]('')
@@ -38,3 +38,21 @@ for it in D:
     it['html']=texto+'<div class="fotos'+('' if c.get('redondo',True) else ' recto')+'">'+arma(c['disp'],ps)+'</div>'
 json.dump(D,open('docente.json','w'),ensure_ascii=False,separators=(',',':'))
 print('fotos:',len(os.listdir('img/docente')),'peso:',sum(os.path.getsize('img/docente/'+f) for f in os.listdir('img/docente'))//1024,'KB')
+
+# Columnitas: las fotos web salen de los originales de archivo/media/, en WebP.
+for nombre in ['columnitas.json','archivo/columnitas-guardadas.json']:
+    C=json.load(open(nombre)); hecho=0
+    for c in C:
+        def cambia(m):
+            global hecho
+            base=os.path.splitext(os.path.basename(m.group(1)))[0]
+            orig=[x for x in os.listdir('archivo/media') if os.path.splitext(x)[0]==base]
+            if not orig: return m.group(0)
+            im=Image.open('archivo/media/'+orig[0]); im=im.convert('RGBA' if im.mode in ('RGBA','LA','P') else 'RGB'); im.thumbnail((1200,1200),Image.LANCZOS)
+            im.save(f'img/columnitas/{base}.webp','WEBP',quality=74,method=6); hecho+=1
+            return f'src="img/columnitas/{base}.webp" width="{im.width}" height="{im.height}"'
+        c['html']=re.sub(r'src="(img/columnitas/[^"]+)" width="\d+" height="\d+"',cambia,c['html'])
+    json.dump(C,open(nombre,'w'),ensure_ascii=False,**({'separators':(',',':')} if nombre=='columnitas.json' else {'indent':1}))
+    print(nombre,'fotos:',hecho)
+for x in os.listdir('img/columnitas'):
+    if not x.endswith('.webp'): os.remove('img/columnitas/'+x)
