@@ -57,7 +57,8 @@
    "y": 0.321,
    "linea": 5,
    "tipo": "principal",
-   "nombre": "Cuentos"
+   "nombre": "Cuentos",
+   "contenido": "cuentos"
   },
   {
    "x": 0.1216,

@@ -1,0 +1,13 @@
+[
+ {
+  "id": "coraje",
+  "nombre": "Coraje",
+  "titulo": "Coraje",
+  "md": "cuentos/coraje.md"
+ },
+ {
+  "id": "pronto",
+  "nombre": "Pronto",
+  "pronto": true
+ }
+]

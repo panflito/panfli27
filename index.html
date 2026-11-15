@@ -6,7 +6,7 @@
 <meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con sus líneas: Theo y Simón, YouTube, cuentos y columnitas, arte visual y más.">
 <title>PANFLITO</title>
 <link rel="preload" href="img/mapa.png" as="image" fetchpriority="high">
-<link rel="preload" href="mapa.json?v=202611152234" as="fetch" crossorigin>
+<link rel="preload" href="mapa.json?v=202611152244" as="fetch" crossorigin>
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
@@ -25,6 +25,7 @@ body{margin:0}
   color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{overflow-x:clip}
 body{margin:0;background:var(--papel);color:var(--tinta);font-family:var(--titulo);overflow-x:clip}
 body.abierta{overflow:hidden}
@@ -106,6 +107,8 @@ button:focus-visible{outline:none}
   -webkit-mask-image:linear-gradient(to right,transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(to right,transparent,#000 22%,#000 78%,transparent)}
 .rueda::-webkit-scrollbar{display:none}
 .pista{position:relative;flex:none;display:flex;box-sizing:content-box;height:100%;padding:0 var(--pad,50vw)}
+.rueda.corta .pista::before{left:calc(var(--pad,50vw) - 36px);right:calc(var(--pad,50vw) - 36px)}
+.texto.cuento p+p{margin-top:1.1em}
 .pista::before{content:"";position:absolute;left:calc(var(--pad,50vw) + 8px);right:calc(var(--pad,50vw) + 8px);bottom:4px;height:5px;border-radius:3px;background:var(--gris)}
 .rueda button::before{content:"";position:absolute;left:50%;bottom:6px;width:5px;height:20px;margin-left:-2.5px;border-radius:3px;background:var(--gris);transform-origin:50% 100%;transform:rotate(45deg);transition:background .15s}
 .rueda button.aqui::before{background:var(--c)}
@@ -187,7 +190,7 @@ let paso=150;
 const medirPaso=()=>{const W=riel.clientWidth||innerWidth;const mx=Math.max(1,...Object.values(E.reduce((o,e)=>(o[e.k]=(o[e.k]||0)+1,o),{})));paso=Math.round(Math.max(Math.min(150,W*.36),n>mx?W/(n-mx):0));document.documentElement.style.setProperty('--celda',paso+'px')};
 const ancho=()=>paso;
 
-fetch('mapa.json?v=202611152234').then(r=>r.json()).then(datos=>{
+fetch('mapa.json?v=202611152244').then(r=>r.json()).then(datos=>{
   M=datos;
   // recorrido: las líneas en orden, y de cada una primero la principal y después las chicas. Es circular.
   M.orden.forEach(k=>{const l=M.lineas[k];
@@ -309,7 +312,7 @@ addEventListener('resize',()=>{if(innerWidth===anchoV)return;anchoV=innerWidth;m
 
 /* ---- lo que hay en cada parada ---- */
 const datos={},elegidas={};
-const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611152234').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
+const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611152244').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
 
 /* ---- carga anticipada ----
    Al entrar: el mapa; después, lo primero de cada línea en este orden: celeste, amarilla, violeta, verde, roja.
@@ -317,7 +320,7 @@ const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611152234').then(r=>r.json
    Una sola cola, de a un archivo por vez, para no competir con lo que se está mirando. */
 const PRIORIDAD=['5','2','4','3','1'];
 const cola=[],pedido=new Set();let cargando=false;
-const bajar=u=>new Promise(ok=>{if(/\.mp4$/.test(u))fetch(u).then(x=>x.blob()).catch(()=>{}).then(ok);else{const im=new Image();im.onload=im.onerror=ok;im.src=u}});
+const bajar=u=>new Promise(ok=>{if(/\.(mp4|md)(\?|$)/.test(u))fetch(u).then(x=>x.blob()).catch(()=>{}).then(ok);else{const im=new Image();im.onload=im.onerror=ok;im.src=u}});
 const correr=()=>{if(cargando)return;const u=cola.shift();if(!u)return;cargando=true;bajar(u).then(()=>{cargando=false;correr()})};
 const pedir=(us,adelante)=>{us=us.filter(u=>!pedido.has(u));us.forEach(u=>pedido.add(u));if(adelante)cola.unshift(...us);else cola.push(...us);correr()};
 const archivos=(c,videos)=>{const h=c.html||'',out=(h.match(/ src="[^"]+"/g)||[]).map(m=>m.slice(6,-1));
@@ -328,7 +331,7 @@ const conectar=src=>{try{const o=new URL(src).origin;if(conectados.has(o))return
 // lo primero de una parada (textos y fotos del primer ítem) o todo (con sus videos)
 const deParada=(e,todo)=>{if(e.p.embed){conectar(e.p.embed.src);return Promise.resolve([])}
   if(!e.p.contenido)return Promise.resolve([]);
-  return traer(e.p.contenido).then(C=>{C=[].concat(C);return (todo?C:C.slice(0,1)).flatMap(c=>archivos(c,todo))}).catch(()=>[])};
+  return traer(e.p.contenido).then(C=>{C=[].concat(C);return (todo?C:C.slice(0,1)).flatMap(c=>[...(c.md?[c.md+'?v=202611152244']:[]),...archivos(c,todo)])}).catch(()=>[])};
 const arranque=()=>PRIORIDAD.flatMap(k=>E.filter(e=>String(e.k)===k))
   .reduce((q,e)=>q.then(()=>deParada(e,false)).then(us=>pedir(us,false)),Promise.resolve());
 const alAbrir=i=>{if(!n)return;Promise.all([deParada(E[i],true),deParada(E[(i+1)%n],false),deParada(E[(i-1+n)%n],false)])
@@ -392,6 +395,9 @@ function cinta(c){
   ruedaMouse(c,(d,probar)=>{const j=centro()+d;if(j<0||j>=vs.length)return false;if(!probar)c.scrollTo({left:vs[j].offsetLeft+vs[j].offsetWidth/2-c.clientWidth/2,behavior:quieto?'auto':'smooth'});return true});
   pon(0);
 }
+// el .md de un cuento se muestra tal cual: párrafos separados por línea en blanco, cada renglón respetado, *cursiva* y **negrita**
+function md(t){const esc=x=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return t.replace(/\r\n?/g,'\n').split(/\n\s*\n/).filter(p=>p.trim()).map(p=>'<p>'+esc(p).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').split('\n').join('<br>')+'</p>').join('')}
 function coleccion(C,e){
   const rueda=document.createElement('div'),pista=rueda.appendChild(document.createElement('div')),texto=document.createElement('article');rueda.className='rueda';pista.className='pista';texto.className='texto';
   let sel=-1,t=0;
@@ -401,7 +407,11 @@ function coleccion(C,e){
     [...pista.children].forEach((b,k)=>b.classList.toggle('aqui',k===j));
     texto.innerHTML='<h2></h2><p class="dato"></p><div></div><button type="button" class="arriba" aria-label="Volver arriba">↑</button>';
     texto.lastChild.addEventListener('click',()=>vista.scrollTo({top:0,behavior:quieto?'auto':'smooth'}));
-    texto.children[0].textContent=c.titulo;texto.children[1].textContent=c.dato||(c.tipo+' · '+c.anio);texto.children[2].innerHTML=c.html;
+    const dato=c.dato||(c.tipo?c.tipo+' · '+c.anio:'');texto.classList.toggle('cuento',!!c.md);
+    texto.children[0].textContent=c.titulo||'';texto.children[1].textContent=dato;texto.children[1].hidden=!dato;
+    if(c.pronto){texto.children[0].hidden=true;texto.lastChild.hidden=true;texto.children[2].innerHTML='<p class="pronto">Pronto</p>'}
+    else if(c.md&&!c.html){fetch(c.md+'?v=202611152244').then(x=>x.text()).then(t=>{c.html=md(t);if(sel===j)texto.children[2].innerHTML=c.html}).catch(()=>{})}
+    else texto.children[2].innerHTML=c.html;
     texto.querySelectorAll('.cinta').forEach(cinta);
     texto.querySelectorAll('.grilla').forEach(grilla);
     if(abierta&&E[actual]===e)history.replaceState(history.state,'','#'+e.id+'/'+c.id);
@@ -415,6 +425,7 @@ function coleccion(C,e){
     const j=centro();
     if(j!==enVivo){if(enVivo>=0){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}enVivo=j;[...pista.children].forEach((b,k)=>b.classList.toggle('aqui',k===j))}
     clearTimeout(t);t=setTimeout(()=>elegir(centro(),false),110)},{passive:true});
+  if(C.length<=3)rueda.classList.add('corta');
   cont.append(rueda,texto);
   ruedaMouse(rueda,(d,probar)=>{const j=(enVivo<0?sel:enVivo)+d;if(j<0||j>=C.length)return false;if(!probar){enVivo=j;elegir(j,'suave')}return true});
   pista.style.width=(C.length*58)+'px';pista.style.setProperty('--pad',(rueda.clientWidth/2)+'px');
