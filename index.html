@@ -6,7 +6,7 @@
 <meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con sus líneas: Theo y Simón, YouTube, cuentos y columnitas, arte visual y más.">
 <title>PANFLITO</title>
 <link rel="preload" href="img/mapa.png" as="image" fetchpriority="high">
-<link rel="preload" href="mapa.json?v=202611191810" as="fetch" crossorigin>
+<link rel="preload" href="mapa.json?v=202611191929" as="fetch" crossorigin>
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
@@ -198,7 +198,7 @@ let paso=150;
 const medirPaso=()=>{const W=riel.clientWidth||innerWidth;const mx=Math.max(1,...Object.values(E.reduce((o,e)=>(o[e.k]=(o[e.k]||0)+1,o),{})));paso=Math.round(Math.max(Math.min(150,W*.36),n>mx?W/(n-mx):0));document.documentElement.style.setProperty('--celda',paso+'px')};
 const ancho=()=>paso;
 
-fetch('mapa.json?v=202611191810').then(r=>r.json()).then(datos=>{
+fetch('mapa.json?v=202611191929').then(r=>r.json()).then(datos=>{
   M=datos;
   // recorrido: las líneas en orden, y de cada una primero la principal y después las chicas. Es circular.
   M.orden.forEach(k=>{const l=M.lineas[k];
@@ -320,7 +320,7 @@ addEventListener('resize',()=>{if(innerWidth===anchoV)return;anchoV=innerWidth;m
 
 /* ---- lo que hay en cada parada ---- */
 const datos={},elegidas={};
-const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611191810').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
+const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611191929').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
 
 /* ---- carga anticipada ----
    Al entrar: el mapa; después, lo primero de cada línea en este orden: celeste, amarilla, violeta, verde, roja.
@@ -339,7 +339,7 @@ const conectar=src=>{try{const o=new URL(src).origin;if(conectados.has(o))return
 // lo primero de una parada (textos y fotos del primer ítem) o todo (con sus videos)
 const deParada=(e,todo)=>{if(e.p.embed){conectar(e.p.embed.src);return Promise.resolve([])}
   if(!e.p.contenido)return Promise.resolve([]);
-  return traer(e.p.contenido).then(C=>{const uno=!Array.isArray(C);C=[].concat(C);const us=(todo?C:C.slice(0,1)).flatMap(c=>[...(c.md?[c.md+'?v=202611191810']:[]),...archivos(c,todo)]);
+  return traer(e.p.contenido).then(C=>{const uno=!Array.isArray(C);C=[].concat(C);const us=(todo?C:C.slice(0,1)).flatMap(c=>[...(c.md?[c.md+'?v=202611191929']:[]),...archivos(c,todo)]);
     return uno&&!todo?us.slice(0,4):us}).catch(()=>[])};
 const arranque=()=>PRIORIDAD.flatMap(k=>E.filter(e=>String(e.k)===k))
   .reduce((q,e)=>q.then(()=>deParada(e,false)).then(us=>pedir(us,false)),Promise.resolve());
@@ -427,7 +427,7 @@ function coleccion(C,e){
     const dato=c.dato||(c.tipo?c.tipo+' · '+c.anio:'');texto.classList.toggle('cuento',!!c.md);
     texto.children[0].textContent=c.titulo||'';texto.children[1].textContent=dato;texto.children[1].hidden=!dato;
     if(c.pronto){texto.children[0].hidden=true;texto.lastChild.hidden=true;texto.children[2].innerHTML='<p class="pronto">Pronto</p>'}
-    else if(c.md&&!c.html){fetch(c.md+'?v=202611191810').then(x=>x.text()).then(t=>{c.html=md(t);if(sel===j)texto.children[2].innerHTML=c.html}).catch(()=>{})}
+    else if(c.md&&!c.html){fetch(c.md+'?v=202611191929').then(x=>x.text()).then(t=>{c.html=md(t);if(sel===j)texto.children[2].innerHTML=c.html}).catch(()=>{})}
     else texto.children[2].innerHTML=c.html;
     texto.querySelectorAll('.cinta').forEach(cinta);
     texto.querySelectorAll('.grilla').forEach(grilla);
