@@ -139,6 +139,13 @@ button:focus-visible{outline:none}
 .fotos.tinta .ff{gap:14px}
 .fotos.tinta img{mix-blend-mode:multiply}
 .texto.hoja{margin-top:10px;background:var(--papel)}
+.texto.hoja h2+.dato{margin-top:-10px}
+/* dibujos en blanco: un borde fino para que la hoja se vea sobre el papel */
+.texto .fotos.dibujos img{border:1px solid #dcd9d2;background:#fff}
+.pie{display:flex;justify-content:center;gap:14px;margin:44px 0 0}
+.redondo{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--tinta);background:#fff;color:var(--tinta);font-size:20px;line-height:1;text-decoration:none}
+.texto a.redondo{color:var(--tinta);text-decoration:none}
+.redondo:focus-visible{outline:3px solid var(--c);outline-offset:2px}
 .texto.hoja h2{margin-bottom:16px;font-size:22px;letter-spacing:.06em;text-transform:uppercase;color:var(--c)}
 .texto .ficha{margin:14px 0 0;font-size:15.5px}
 .texto .ficha b{display:block;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
@@ -320,7 +327,8 @@ const conectar=src=>{try{const o=new URL(src).origin;if(conectados.has(o))return
 // lo primero de una parada (textos y fotos del primer ítem) o todo (con sus videos)
 const deParada=(e,todo)=>{if(e.p.embed){conectar(e.p.embed.src);return Promise.resolve([])}
   if(!e.p.contenido)return Promise.resolve([]);
-  return traer(e.p.contenido).then(C=>{C=[].concat(C);return (todo?C:C.slice(0,1)).flatMap(c=>[...(c.md?[c.md+'?v=__V__']:[]),...archivos(c,todo)])}).catch(()=>[])};
+  return traer(e.p.contenido).then(C=>{const uno=!Array.isArray(C);C=[].concat(C);const us=(todo?C:C.slice(0,1)).flatMap(c=>[...(c.md?[c.md+'?v=__V__']:[]),...archivos(c,todo)]);
+    return uno&&!todo?us.slice(0,4):us}).catch(()=>[])};
 const arranque=()=>PRIORIDAD.flatMap(k=>E.filter(e=>String(e.k)===k))
   .reduce((q,e)=>q.then(()=>deParada(e,false)).then(us=>pedir(us,false)),Promise.resolve());
 const alAbrir=i=>{if(!n)return;Promise.all([deParada(E[i],true),deParada(E[(i+1)%n],false),deParada(E[(i-1+n)%n],false)])
@@ -343,8 +351,16 @@ function mostrar(i){
   }
 }
 function pagina(C){
-  const t=document.createElement('article');t.className='texto hoja';t.innerHTML='<h2></h2><div></div>';
-  t.children[0].textContent=C.titulo;t.children[1].innerHTML=C.html;cont.appendChild(t);
+  const t=document.createElement('article');t.className='texto hoja';t.innerHTML='<h2></h2><p class="dato"></p><div></div>';
+  t.children[0].textContent=C.titulo;t.children[1].textContent=C.dato||'';t.children[1].hidden=!C.dato;t.children[2].innerHTML=C.html;
+  // pie: descargar (si hay) y volver arriba, centrados juntos
+  const pie=document.createElement('div');pie.className='pie';
+  if(C.descarga){const a=document.createElement('a');a.className='redondo';a.href=C.descarga.url;a.target='_blank';a.rel='noopener';a.setAttribute('aria-label',C.descarga.etiqueta);a.title=C.descarga.etiqueta;
+    a.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z" fill="var(--blanco,#fff)"/><path d="M9.5 17h5M9.5 19h3"/></svg>';
+    a.addEventListener('click',()=>contar('descargar',{parada:C.titulo}));pie.appendChild(a)}
+  const up=document.createElement('button');up.type='button';up.className='redondo';up.setAttribute('aria-label','Volver arriba');up.textContent='↑';
+  up.addEventListener('click',()=>vista.scrollTo({top:0,behavior:quieto?'auto':'smooth'}));pie.appendChild(up);
+  t.appendChild(pie);cont.appendChild(t);
   t.querySelectorAll('.cinta').forEach(cinta);
 }
 function ruedaMouse(el,paso){
