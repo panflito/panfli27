@@ -316,7 +316,7 @@ const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=__V__').then(r=>r.json()).cat
    Una sola cola, de a un archivo por vez, para no competir con lo que se está mirando. */
 const PRIORIDAD=['5','2','4','3','1'];
 const cola=[],pedido=new Set();let cargando=false;
-const bajar=u=>new Promise(ok=>{if(/\.(mp4|md)(\?|$)/.test(u))fetch(u).then(x=>x.blob()).catch(()=>{}).then(ok);else{const im=new Image();im.onload=im.onerror=ok;im.src=u}});
+const bajar=u=>new Promise(ok=>{if(/\.(mp4|md)(\?|$)/.test(u))fetch(u,/\.md$/.test(u)?{cache:'no-cache'}:undefined).then(x=>x.blob()).catch(()=>{}).then(ok);else{const im=new Image();im.onload=im.onerror=ok;im.src=u}});
 const correr=()=>{if(cargando)return;const u=cola.shift();if(!u)return;cargando=true;bajar(u).then(()=>{cargando=false;correr()})};
 const pedir=(us,adelante)=>{us=us.filter(u=>!pedido.has(u));us.forEach(u=>pedido.add(u));if(adelante)cola.unshift(...us);else cola.push(...us);correr()};
 const archivos=(c,videos)=>{const h=c.html||'',out=(h.match(/ src="[^"]+"/g)||[]).map(m=>m.slice(6,-1));
@@ -327,7 +327,7 @@ const conectar=src=>{try{const o=new URL(src).origin;if(conectados.has(o))return
 // lo primero de una parada (textos y fotos del primer ítem) o todo (con sus videos)
 const deParada=(e,todo)=>{if(e.p.embed){conectar(e.p.embed.src);return Promise.resolve([])}
   if(!e.p.contenido)return Promise.resolve([]);
-  return traer(e.p.contenido).then(C=>{const uno=!Array.isArray(C);C=[].concat(C);const us=(todo?C:C.slice(0,1)).flatMap(c=>[...(c.md?[c.md+'?v=__V__']:[]),...archivos(c,todo)]);
+  return traer(e.p.contenido).then(C=>{const uno=!Array.isArray(C);C=[].concat(C);const us=(todo?C:C.slice(0,1)).flatMap(c=>[...(c.md?[c.md]:[]),...archivos(c,todo)]);
     return uno&&!todo?us.slice(0,4):us}).catch(()=>[])};
 const arranque=()=>PRIORIDAD.flatMap(k=>E.filter(e=>String(e.k)===k))
   .reduce((q,e)=>q.then(()=>deParada(e,false)).then(us=>pedir(us,false)),Promise.resolve());
@@ -426,7 +426,7 @@ function coleccion(C,e){
     const dato=c.dato||(c.tipo?c.tipo+' · '+c.anio:'');texto.classList.toggle('cuento',!!c.md);
     texto.children[0].textContent=c.titulo||'';texto.children[1].textContent=dato;texto.children[1].hidden=!dato;
     if(c.pronto){texto.children[0].hidden=true;texto.lastChild.hidden=true;texto.children[2].innerHTML='<p class="pronto">Pronto</p>'}
-    else if(c.md&&!c.html){fetch(c.md+'?v=__V__').then(x=>x.text()).then(t=>{c.html=md(t);if(sel===j)texto.children[2].innerHTML=c.html}).catch(()=>{})}
+    else if(c.md&&!c.html){fetch(c.md,{cache:'no-cache'}).then(x=>x.text()).then(t=>{c.html=md(t);if(sel===j)texto.children[2].innerHTML=c.html}).catch(()=>{})}
     else texto.children[2].innerHTML=c.html;
     texto.querySelectorAll('.cinta').forEach(cinta);
     texto.querySelectorAll('.grilla').forEach(grilla);
