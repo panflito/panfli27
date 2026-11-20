@@ -2,7 +2,7 @@ DESDE LA YPF
 -me llevo la maquina para casa. para el consultorio.
 -te espero comprá flan. mixto.
 
-lo que pasó es que la maquina llego a Fernacai y se puedieron hacer imagenes de contraste con aluro 51. Esto era útil por sobretodo para tener algun tipo de medidometro con respecto a gliforiudium en basos cardiobasculares.
+lo que pasó es que la maquina llego a Fernacai y se puedieron hacer imagenes de contraste con aluro 51. Esto era útil por sobretodo para tener algun tipo de medidometro con respecto a la densidad de basos cardiobasculares.
 
 justo y muriel vivian con un perro de aspecto cobarde y sus gallinas. el perro no era suyo. ni siquiera lo dejaban entrar a la entrada vidriada donde estaban las botas, una silla, paraguas, camperas colgadas.
 
