@@ -6,7 +6,7 @@
 <meta name="description" content="Panflito: la casa del árbol de Theo Fernandez Noguera, con sus líneas: Theo y Simón, YouTube, cuentos y columnitas, arte visual y más.">
 <title>PANFLITO</title>
 <link rel="preload" href="img/mapa.png" as="image" fetchpriority="high">
-<link rel="preload" href="mapa.json?v=202611211552" as="fetch" crossorigin>
+<link rel="preload" href="mapa.json?v=202611211601" as="fetch" crossorigin>
 <!-- Estadísticas (Google Analytics de panflito). Carga aparte, no frena la página. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1MZMMREN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-FT1MZMMREN');</script>
@@ -158,8 +158,6 @@ button:focus-visible{outline:none}
 @media (min-width:760px){
   .texto .hojas{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:start}
   .texto .hojas .hoja{width:auto;margin:0;transform:translateX(var(--x)) rotate(var(--r2))}
-  .texto .hojas .hoja.entera{grid-column:span 2}
-  .texto .hojas .hoja.sola{grid-column:span 2;justify-self:center;width:calc(50% - 3px)}
 }
 /* dibujos en blanco: un borde fino para que la hoja se vea sobre el papel */
 .texto .fotos.dibujos img{border:1px solid #dcd9d2;background:#fff}
@@ -208,7 +206,7 @@ let paso=150;
 const medirPaso=()=>{const W=riel.clientWidth||innerWidth;const mx=Math.max(1,...Object.values(E.reduce((o,e)=>(o[e.k]=(o[e.k]||0)+1,o),{})));paso=Math.round(Math.max(Math.min(150,W*.36),n>mx?W/(n-mx):0));document.documentElement.style.setProperty('--celda',paso+'px')};
 const ancho=()=>paso;
 
-fetch('mapa.json?v=202611211552').then(r=>r.json()).then(datos=>{
+fetch('mapa.json?v=202611211601').then(r=>r.json()).then(datos=>{
   M=datos;
   // recorrido: las líneas en orden, y de cada una primero la principal y después las chicas. Es circular.
   M.orden.forEach(k=>{const l=M.lineas[k];
@@ -330,7 +328,7 @@ addEventListener('resize',()=>{if(innerWidth===anchoV)return;anchoV=innerWidth;m
 
 /* ---- lo que hay en cada parada ---- */
 const datos={},elegidas={};
-const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611211552').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
+const traer=k=>datos[k]=datos[k]||fetch(k+'.json?v=202611211601').then(r=>r.json()).catch(e=>{datos[k]=null;throw e});
 
 /* ---- carga anticipada ----
    Al entrar: el mapa; después, lo primero de cada línea en este orden: celeste, amarilla, violeta, verde, roja.
